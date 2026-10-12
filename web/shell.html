@@ -32,40 +32,51 @@
   <header><strong>SSP WEB PORT</strong><span class="badge">PC · Maus &amp; Tastatur</span><span class="spacer"></span><button id="help-button">Hilfe</button><button id="fullscreen">Vollbild</button></header>
   <canvas id="canvas" tabindex="0">Dein Browser unterstützt kein Canvas.</canvas>
   <section id="overlay" aria-label="Startmenü">
-    <div class="landscape" aria-hidden="true"><div class="cloud one"></div><div class="cloud two"></div><div class="scenery"></div><div class="scenery left"></div></div>
+    <div class="landscape" aria-hidden="true"><div class="beat-grid"></div><div class="space-frame"></div><div class="space-frame two"></div><div class="space-frame three"></div><i class="star one"></i><i class="star two"></i><i class="star three"></i></div>
     <div id="panel">
       <div class="menu-scene">
         <div class="hero-art">
-          <div class="title-lockup"><p class="eyebrow">Rhythia · Community Web Port</p><h1 class="game-title"><span>Sound</span><span>Space</span><span class="plus">Plus</span></h1></div>
-          <svg class="note-art" viewBox="0 0 560 370" aria-hidden="true">
-            <defs><linearGradient id="deck" x2=".8" y2="1"><stop stop-color="#fff3d5"/><stop offset="1" stop-color="#d5b697"/></linearGradient><linearGradient id="note" x2=".3" y2="1"><stop stop-color="#b85539"/><stop offset="1" stop-color="#813525"/></linearGradient></defs>
-            <path d="M59 213 333 150 501 237 221 323Z" fill="#76525c" opacity=".16"/>
-            <path d="M56 203 322 143 501 225 227 298 56 223Z" fill="#bfa388"/>
-            <path d="m56 203 266-60 179 82-274 68Z" fill="url(#deck)"/>
-            <path d="m227 293 274-68v21l-274 72Z" fill="#f7e5c9"/>
-            <path d="m56 203 171 90v25L56 224Z" fill="#d4b897"/>
-            <path d="m91 204 230-49 142 67-234 59Z" fill="none" stroke="#fff4d7" stroke-width="5"/>
-            <path d="m292 97 111-25 13 16-113 26Z" fill="#e3aa78"/>
-            <path d="m292 97 13 17v108l-13-12Z" fill="#632c25"/>
-            <path d="m403 72 13 16v108l-13-11Z" fill="#632c25"/>
-            <path d="M280 89 391 64v121c0 19-46 30-52 11-6-17 21-30 38-28V106l-83 19v85c0 19-46 31-52 12-6-17 20-30 38-28Z" fill="url(#note)" stroke="#ffefcf" stroke-width="5" stroke-linejoin="round"/>
-            <path d="m152 221 32-8 21 12-32 9Z" fill="#b65b44"/><path d="m152 221 21 13v8l-21-12Z" fill="#773c36"/><path d="m173 234 32-9v8l-32 9Z" fill="#944435"/>
-            <path d="m356 243 34-8 20 12-34 9Z" fill="#a694b5"/><path d="m356 243 20 13v8l-20-12Z" fill="#736081"/><path d="m376 256 34-9v8l-34 9Z" fill="#8e769a"/>
-            <path d="m186 125 28-7 18 10-29 8Z" fill="#fff2cd"/><path d="m186 125 17 11v18l-17-10Z" fill="#c6a985"/><path d="m203 136 29-8v18l-29 8Z" fill="#e2c6a0"/>
-            <path d="m423 148 19-5 13 7-20 6Z" fill="#f4deba"/><path d="m423 148 12 8v13l-12-8Z" fill="#be9c7d"/><path d="m435 156 20-6v13l-20 6Z" fill="#d8bc98"/>
+          <div class="title-lockup"><p class="eyebrow">SOUND SPACE PLUS</p><h1 class="game-title">rhythia</h1><p class="brand-caption">Community Web Port</p></div>
+          <svg class="note-art" viewBox="0 0 560 430" aria-hidden="true">
+            <defs>
+              <linearGradient id="note-edge" x2="1" y2="1"><stop stop-color="#74c1ec"/><stop offset="1" stop-color="#c9509e"/></linearGradient>
+              <filter id="emblem-glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="#c9509e" flood-opacity=".28"/></filter>
+            </defs>
+            <ellipse cx="280" cy="371" rx="145" ry="17" fill="#b840a1" opacity=".06"/>
+            <path d="m72 332 203-80 224 80-212 71Z" fill="none" stroke="url(#note-edge)" stroke-width="1" opacity=".26"/>
+            <path d="m101 333 175-69 193 69-182 62Z" fill="none" stroke="#74c1ec" opacity=".12"/>
+            <image href="rhythia-icon.svg" x="135" y="53" width="320" height="320" opacity=".14"/>
+            <image href="rhythia-icon.svg" x="129" y="46" width="320" height="320" opacity=".3"/>
+            <image href="rhythia-icon.svg" x="122" y="38" width="320" height="320" filter="url(#emblem-glow)"/>
+            <g transform="rotate(-12 260 195)">
+              <rect x="221" y="171" width="73" height="73" rx="5" fill="#292c41"/>
+              <rect x="215" y="163" width="73" height="73" rx="5" fill="#edf1fc"/>
+              <rect x="232" y="181" width="39" height="39" rx="2" fill="none" stroke="#bbc4dc"/>
+              <rect x="246" y="195" width="11" height="11" fill="#ff3971"/>
+            </g>
+            <g transform="rotate(14 362 286)">
+              <rect x="342" y="270" width="40" height="40" rx="4" fill="#273849"/>
+              <rect x="337" y="264" width="40" height="40" rx="4" fill="#a8d9f5"/>
+            </g>
+            <g transform="rotate(-18 125 245)">
+              <rect x="103" y="226" width="35" height="35" rx="3" fill="#633b66"/>
+              <rect x="98" y="220" width="35" height="35" rx="3" fill="#d087c0"/>
+            </g>
+            <g transform="rotate(12 415 118)"><rect x="410" y="113" width="17" height="17" rx="2" fill="#c8d8eb"/></g>
+            <path d="m103 128 10 0m-5-5v10m337 190h10m-5-5v10" stroke="#8a7eb3" opacity=".8"/>
           </svg>
         </div>
         <div class="menu-side">
           <nav class="menu-actions" aria-label="Hauptmenü">
-            <button id="start" class="menu-button" aria-label="Spiel starten">Spielen</button>
-            <button id="how-to-play" class="menu-button">Anleitung</button>
-            <button id="show-credits" class="menu-button">Credits</button>
+            <button id="start" class="menu-button" aria-label="Spiel starten"><span class="menu-index" aria-hidden="true">01</span><span>Spielen</span></button>
+            <button id="how-to-play" class="menu-button"><span class="menu-index" aria-hidden="true">02</span><span>Anleitung</span></button>
+            <button id="show-credits" class="menu-button"><span class="menu-index" aria-hidden="true">03</span><span>Credits</span></button>
           </nav>
-          <p class="menu-caption">Deine Maps. Dein Rhythmus.<br>PC · Maus &amp; Tastatur</p>
+          <p class="menu-caption">Deine Maps. Dein Rhythmus.<br><span>PC · Maus &amp; Tastatur</span></p>
           <div class="load-state"><progress id="progress" value="0" max="1" hidden></progress><p id="status" role="status">Bereit für deine nächste Map.</p></div>
         </div>
       </div>
-      <footer class="menu-footer"><p>Eigene Maps importieren · Lokal spielen</p><p class="storage-note">Maps und Highscores bleiben in diesem Browser. Kein Upload.</p><a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode &amp; Lizenz</a></footer>
+      <footer class="menu-footer"><div><p>Eigene Maps importieren · Lokal spielen</p><p class="storage-note">Maps und Highscores bleiben in diesem Browser. Kein Upload.</p></div><a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode &amp; Lizenz</a></footer>
     </div>
   </section>
   <dialog id="help" class="menu-dialog" aria-labelledby="help-title"><h2 id="help-title">So spielst du</h2><p><b>1. Deine Map importieren</b><br>Spiel starten → Plus-Symbol links → Content Manager → Sound Space Plus Map. Wähle eine eigene <code>.sspm</code>-Datei. Alternativ: Text-Map plus MP3/OGG.</p><p><b>2. In den Rhythmus kommen</b><br>Map auswählen und starten. Ein Klick auf „Spielen / Fortsetzen“ fängt die Maus ein. Bewege sie, um die Noten zu treffen.</p><p><kbd>ESC</kbd> pausiert und gibt die Maus frei. Empfindlichkeit und Audio-Offset findest du in den Spieleinstellungen.</p><p>Deine Imports bleiben lokal in diesem Browser gespeichert. Das Löschen der Websitedaten entfernt sie. Importiere nur Dateien, die du verwenden darfst.</p><button id="close-help" autofocus>Alles klar</button></dialog>
