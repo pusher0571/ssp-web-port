@@ -25,23 +25,56 @@
     .capture-panel { width: min(90%, 460px); padding: 30px; text-align: center; background: #171328; border: 1px solid #65527c; border-radius: 12px; }
     #import-overlay { position: fixed; inset: 48px 0 0; display: grid; place-items: center; background: #080914d9; z-index: 9; }
   </style>
+  <link rel="stylesheet" href="landing.css">
   $GODOT_HEAD_INCLUDE
 </head>
-<body>
+<body class="pregame">
   <header><strong>SSP WEB PORT</strong><span class="badge">PC · Maus &amp; Tastatur</span><span class="spacer"></span><button id="help-button">Hilfe</button><button id="fullscreen">Vollbild</button></header>
   <canvas id="canvas" tabindex="0">Dein Browser unterstützt kein Canvas.</canvas>
-  <section id="overlay"><div id="panel">
-    <span class="badge">SOUND SPACE PLUS · COMMUNITY WEB PORT</span><h1>Rhythmus. Zielen. Spielen.</h1>
-    <p>Importiere eine eigene SSPM-Datei über das Plus-Symbol im <b>Content Manager</b>. Musik und Maps werden ausschließlich lokal verarbeitet.</p>
-    <p>Maps, Einstellungen und Highscores werden lokal in diesem Browser gespeichert. Das Löschen der Websitedaten entfernt sie.</p>
-    <button id="start">Spiel starten</button><progress id="progress" value="0" max="1" hidden></progress><p id="status" role="status">Der erste Start lädt die Spieldateien herunter.</p>
-    <small>Inoffizieller Port von <a href="https://github.com/Rhythia/sound-space-plus" target="_blank" rel="noopener">Rhythia / Sound Space Plus</a> · <a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode &amp; Lizenz</a></small>
-  </div></section>
-  <aside id="help" hidden><b>So spielst du</b><p>Importiere eine Map über das Plus-Symbol, wähle sie aus und klicke auf Start. Ein weiterer Klick auf Spielen fängt die Maus ein. Bewege sie, um die Noten zu treffen. Empfindlichkeit und Audio-Offset findest du in den Spieleinstellungen.</p><p><b>Import:</b> Content Manager → Sound Space Plus Map; alternativ Text-Map plus MP3/OGG. Importiere nur Dateien, die du verwenden darfst.</p><p>ESC pausiert und gibt die Maus frei. Zum Fortsetzen auf Spielen klicken. Es gibt keine eingebauten Songs, Online-Downloads oder Replays.</p><button id="close-help">Schließen</button></aside>
+  <section id="overlay" aria-label="Startmenü">
+    <div class="landscape" aria-hidden="true"><div class="cloud one"></div><div class="cloud two"></div><div class="scenery"></div><div class="scenery left"></div></div>
+    <div id="panel">
+      <div class="menu-scene">
+        <div class="hero-art">
+          <div class="title-lockup"><p class="eyebrow">Rhythia · Community Web Port</p><h1 class="game-title"><span>Sound</span><span>Space</span><span class="plus">Plus</span></h1></div>
+          <svg class="note-art" viewBox="0 0 560 370" aria-hidden="true">
+            <defs><linearGradient id="deck" x2=".8" y2="1"><stop stop-color="#fff3d5"/><stop offset="1" stop-color="#d5b697"/></linearGradient><linearGradient id="note" x2=".3" y2="1"><stop stop-color="#b85539"/><stop offset="1" stop-color="#813525"/></linearGradient></defs>
+            <path d="M59 213 333 150 501 237 221 323Z" fill="#76525c" opacity=".16"/>
+            <path d="M56 203 322 143 501 225 227 298 56 223Z" fill="#bfa388"/>
+            <path d="m56 203 266-60 179 82-274 68Z" fill="url(#deck)"/>
+            <path d="m227 293 274-68v21l-274 72Z" fill="#f7e5c9"/>
+            <path d="m56 203 171 90v25L56 224Z" fill="#d4b897"/>
+            <path d="m91 204 230-49 142 67-234 59Z" fill="none" stroke="#fff4d7" stroke-width="5"/>
+            <path d="m292 97 111-25 13 16-113 26Z" fill="#e3aa78"/>
+            <path d="m292 97 13 17v108l-13-12Z" fill="#632c25"/>
+            <path d="m403 72 13 16v108l-13-11Z" fill="#632c25"/>
+            <path d="M280 89 391 64v121c0 19-46 30-52 11-6-17 21-30 38-28V106l-83 19v85c0 19-46 31-52 12-6-17 20-30 38-28Z" fill="url(#note)" stroke="#ffefcf" stroke-width="5" stroke-linejoin="round"/>
+            <path d="m152 221 32-8 21 12-32 9Z" fill="#b65b44"/><path d="m152 221 21 13v8l-21-12Z" fill="#773c36"/><path d="m173 234 32-9v8l-32 9Z" fill="#944435"/>
+            <path d="m356 243 34-8 20 12-34 9Z" fill="#a694b5"/><path d="m356 243 20 13v8l-20-12Z" fill="#736081"/><path d="m376 256 34-9v8l-34 9Z" fill="#8e769a"/>
+            <path d="m186 125 28-7 18 10-29 8Z" fill="#fff2cd"/><path d="m186 125 17 11v18l-17-10Z" fill="#c6a985"/><path d="m203 136 29-8v18l-29 8Z" fill="#e2c6a0"/>
+            <path d="m423 148 19-5 13 7-20 6Z" fill="#f4deba"/><path d="m423 148 12 8v13l-12-8Z" fill="#be9c7d"/><path d="m435 156 20-6v13l-20 6Z" fill="#d8bc98"/>
+          </svg>
+        </div>
+        <div class="menu-side">
+          <nav class="menu-actions" aria-label="Hauptmenü">
+            <button id="start" class="menu-button" aria-label="Spiel starten">Spielen</button>
+            <button id="how-to-play" class="menu-button">Anleitung</button>
+            <button id="show-credits" class="menu-button">Credits</button>
+          </nav>
+          <p class="menu-caption">Deine Maps. Dein Rhythmus.<br>PC · Maus &amp; Tastatur</p>
+          <div class="load-state"><progress id="progress" value="0" max="1" hidden></progress><p id="status" role="status">Bereit für deine nächste Map.</p></div>
+        </div>
+      </div>
+      <footer class="menu-footer"><p>Eigene Maps importieren · Lokal spielen</p><p class="storage-note">Maps und Highscores bleiben in diesem Browser. Kein Upload.</p><a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode &amp; Lizenz</a></footer>
+    </div>
+  </section>
+  <dialog id="help" class="menu-dialog" aria-labelledby="help-title"><h2 id="help-title">So spielst du</h2><p><b>1. Deine Map importieren</b><br>Spiel starten → Plus-Symbol links → Content Manager → Sound Space Plus Map. Wähle eine eigene <code>.sspm</code>-Datei. Alternativ: Text-Map plus MP3/OGG.</p><p><b>2. In den Rhythmus kommen</b><br>Map auswählen und starten. Ein Klick auf „Spielen / Fortsetzen“ fängt die Maus ein. Bewege sie, um die Noten zu treffen.</p><p><kbd>ESC</kbd> pausiert und gibt die Maus frei. Empfindlichkeit und Audio-Offset findest du in den Spieleinstellungen.</p><p>Deine Imports bleiben lokal in diesem Browser gespeichert. Das Löschen der Websitedaten entfernt sie. Importiere nur Dateien, die du verwenden darfst.</p><button id="close-help" autofocus>Alles klar</button></dialog>
+  <dialog id="credits" class="menu-dialog" aria-labelledby="credits-title"><h2 id="credits-title">Credits</h2><p>Ein inoffizieller Browser-Port von <a href="https://github.com/Rhythia/sound-space-plus" target="_blank" rel="noopener">Rhythia / Sound Space Plus</a>.</p><p>Originaler Spielcode: Basil und die Rhythia-Contributors.<br>Web-Port: pusher0571.</p><p>Der Spielcode steht unter der MIT-Lizenz. Copyright- und weitere Lizenzhinweise findest du im <a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode</a>.</p><p>Keine mitgelieferten Songs, kein Online-Katalog. Deine Musik und Maps werden ausschließlich lokal verarbeitet.</p><button id="close-credits" autofocus>Zurück</button></dialog>
   <section id="capture-overlay" hidden><div class="capture-panel"><h2>Bereit?</h2><p>Das Spiel fängt deine Maus ein, damit du frei zielen kannst.</p><button id="capture-button">Spielen / Fortsetzen</button> <button id="leave-game">Zur Map-Auswahl</button><p id="capture-status">ESC pausiert das Spiel und gibt die Maus frei.</p></div></section>
   <input id="file-input" type="file" hidden>
   <section id="import-overlay" hidden><div class="capture-panel"><h2>Lokale Dateien importieren</h2><p>Die Dateien bleiben in diesem Browser.</p><button id="choose-files">Dateien wählen</button> <button id="cancel-import">Abbrechen</button></div></section>
   <script src="runtime.js"></script>
+  <script src="landing.js"></script>
   <script src="$GODOT_URL"></script>
   <script>
     const engine = new Engine($GODOT_CONFIG);
@@ -75,12 +108,12 @@
           document.getElementById('progress').value = total ? current / total : 0;
           status.textContent = total ? 'Lädt … ' + Math.round(current / total * 100) + '%' : 'Spieldateien werden geladen …';
         }, onPrint: (...args) => console.log(...args), onPrintError: (...args) => console.error(...args) });
-        document.getElementById('overlay').hidden = true; canvas.focus();
-      } catch (error) { status.textContent = 'Start fehlgeschlagen: ' + error.message + ' — Bitte Seite neu laden.'; }
+        document.getElementById('overlay').hidden = true; document.body.classList.remove('pregame'); canvas.focus();
+      } catch (error) { status.textContent = 'Start fehlgeschlagen: ' + error.message + ' — Bitte Seite neu laden.'; document.getElementById('start').disabled = false; }
     };
     document.getElementById('fullscreen').onclick = async () => { try { await canvas.requestFullscreen(); canvas.focus(); } catch (error) { alert(error.message); } };
-    document.getElementById('help-button').onclick = () => { document.getElementById('help').hidden = !document.getElementById('help').hidden; };
-    document.getElementById('close-help').onclick = () => { document.getElementById('help').hidden = true; canvas.focus(); };
+    document.getElementById('help-button').onclick = () => document.getElementById('help').showModal();
+    document.getElementById('close-help').onclick = () => { document.getElementById('help').close(); if (!document.body.classList.contains('pregame')) canvas.focus(); };
     canvas.addEventListener('contextmenu', event => event.preventDefault());
     if (!window.crossOriginIsolated) {
       document.getElementById('start').disabled = true;
