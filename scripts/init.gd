@@ -49,7 +49,10 @@ func _ready():
 		stage("",true)
 		return
 	elif Rhythia.first_init_done:
-		thread.start(Rhythia,"do_init")
+		if OS.has_feature("HTML5"):
+			Rhythia.call_deferred("do_init")
+		else:
+			thread.start(Rhythia,"do_init")
 
 	Rhythia.is_init = false
 

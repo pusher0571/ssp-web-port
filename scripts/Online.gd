@@ -52,16 +52,17 @@ func _mapdl_handler(id:String,map:Song):
 	if !Globals.is_valid_url(mapdb_api):
 		mapdl_error(id,"MapDB API Invalid",map); return
 	
-	call_deferred("test_connection")
-	if !yield(self,"_connection_test"):
-		mapdl_error(id,"Failed to connect",map); return
+	if !OS.has_feature("HTML5"):
+		call_deferred("test_connection")
+		if !yield(self,"_connection_test"):
+			mapdl_error(id,"Failed to connect",map); return
 	
 	var dir:Directory = Directory.new()
 	if dir.file_exists(Globals.p("user://mapdl.sspm.part")):
 		dir.remove(Globals.p("user://mapdl.sspm.part"))
 	
 	mapdl_hr.download_file = Globals.p("user://mapdl.sspm.part")
-	var res = mapdl_hr.request(map.download_url)
+	var res = mapdl_hr.request(Web.proxy_url(map.download_url) if OS.has_feature("HTML5") else map.download_url)
 	if res != OK:
 		if res == ERR_INVALID_PARAMETER: mapdl_error(id,"Invalid Parameter",map)
 		elif res == ERR_CANT_CONNECT: mapdl_error(id,"Can't Connect",map)
@@ -130,6 +131,10 @@ const month = [
 ]
 
 func load_db_maps():
+	if OS.has_feature("HTML5"):
+		yield(get_tree(), "idle_frame")
+		load_web_maps()
+		return
 	yield(get_tree(),"idle_frame")
 	
 	if !ProjectSettings.get_setting("application/networking/enabled"):
@@ -354,12 +359,12 @@ func _on_update_request_completed(result:int,response_code:int,headers:PoolStrin
 
 func _ready():
 	add_child(netmaps_hr)
-	netmaps_hr.use_threads = true
+	netmaps_hr.use_threads = !OS.has_feature("HTML5")
 	netmaps_hr.timeout = 80
 	netmaps_hr.connect("request_completed",self,"_on_netmaps_request_completed")
 	
 	add_child(ctest_hr)
-	ctest_hr.use_threads = true
+	ctest_hr.use_threads = !OS.has_feature("HTML5")
 	ctest_hr.timeout = 5
 	ctest_hr.connect("request_completed",self,"_on_ctest_request_completed")
 	
@@ -369,12 +374,12 @@ func _ready():
 	mapdl_hr.connect("request_completed",self,"_on_mapdl_request_completed")
 	
 	add_child(version_hr)
-	version_hr.use_threads = true
+	version_hr.use_threads = !OS.has_feature("HTML5")
 	version_hr.timeout = 5
 	version_hr.connect("request_completed",self,"_on_version_request_completed")
 	
 	add_child(update_hr)
-	update_hr.use_threads = true
+	update_hr.use_threads = !OS.has_feature("HTML5")
 	update_hr.timeout = 0
 	update_hr.connect("request_completed",self,"_on_update_request_completed")
 	
@@ -426,3 +431,23 @@ static func v4():
 	# clock
 	b[10], b[11], b[12], b[13], b[14], b[15]
   ]
+
+# Same-origin catalog snapshot; downloads use the allowlisted Cloudflare worker.
+func load_web_maps():
+	var file = File.new()
+	if file.open("res://assets/web/map-index.json", File.READ) != OK:
+		emit_signal("db_maps_done")
+		return
+	var parsed = JSON.parse(file.get_as_text())
+	file.close()
+	if parsed.error != OK or !(parsed.result is Dictionary):
+		emit_signal("db_maps_done")
+		return
+	var count = 0
+	for id in parsed.result:
+		if !map_registry.idx_id.has(id):
+			var map = Song.new()
+			if map.load_from_db_data(parsed.result[id]).success: map_registry.add_item(map)
+		count += 1
+		if count % 40 == 0: yield(get_tree(), "idle_frame")
+	emit_signal("db_maps_done")

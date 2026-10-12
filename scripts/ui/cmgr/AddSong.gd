@@ -539,7 +539,10 @@ func file_selected(files:PoolStringArray):
 				$TxtFile/H/E/Cover/C.pressed = true
 		FO_SSPM:
 			song = Song.new()
-			song.load_from_sspm(files[0])
+			var imported = song.load_from_sspm(files[0])
+			if !(imported is Song):
+				Globals.notify(Globals.NOTIFY_ERROR, str(imported), "Import failed")
+				return
 			$SelectType.visible = false
 			populate_edit_screen()
 			$Edit.visible = true
@@ -852,6 +855,10 @@ func back_to_menu():
 
 func _ready():
 	
+	if OS.has_feature("HTML5"):
+		$SelectType/vulnus.disabled = true
+		$SelectType/vulnus.hint_tooltip = "Convert Vulnus archives to SSPM in the desktop game first."
+		$SelectType/sspmr.disabled = true
 	$SelectType/txt.connect("pressed",self,"select_type",[T_TXT])
 	$SelectType/sspm.connect("pressed",self,"select_type",[T_SSPM])
 	$SelectType/vulnus.connect("pressed",self,"select_type",[T_VULNUS])

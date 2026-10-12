@@ -167,7 +167,7 @@ var vr:bool = false
 var fake_vr:bool = false
 var vr_available:bool = false
 var vr_interface:ARVRInterface
-var vr_player:VRPlayer
+var vr_player:Spatial
 var vr_left_handed:bool = false
 var vr_controller_type:int = Globals.VR_GENERIC
 
@@ -283,7 +283,7 @@ func start_vr():
 		ev.axis = JOY_VR_ANALOG_TRIGGER
 		InputMap.action_add_event("vr_click",ev)
 
-	var vr_av:VRPlayer = load("res://vr/VRPlayer.tscn").instance()
+	var vr_av:Spatial = load("res://vr/VRPlayer.tscn").instance()
 	rootg.add_child(vr_av)
 	vr_av.name = "VRPlayer"
 	vr_player = vr_av
@@ -2503,7 +2503,9 @@ func do_init(_ud=null):
 		emit_signal("init_stage_reached","Check VR status")
 		yield(get_tree(),"idle_frame")
 
-		var interface = ARVRServer.find_interface("OpenVR")
+		var interface = null
+		if not OS.has_feature("HTML5"):
+			interface = ARVRServer.find_interface("OpenVR")
 		if interface:
 			vr_interface = interface
 			vr_available = true

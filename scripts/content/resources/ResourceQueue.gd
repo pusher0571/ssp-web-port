@@ -12,15 +12,15 @@ var queue = []
 var pending = {}
 
 func _lock(_caller):
-	mutex.lock()
+	if mutex: mutex.lock()
 
 
 func _unlock(_caller):
-	mutex.unlock()
+	if mutex: mutex.unlock()
 
 
 func _post(_caller):
-	semaphore.post()
+	if semaphore: semaphore.post()
 
 
 func _wait(_caller):
@@ -105,7 +105,12 @@ func get_resource(path):
 				queue.remove(pos)
 				queue.insert(0, res)
 
-			res = _wait_for_resource(res, path)
+			if OS.has_feature("HTML5"):
+				while res.poll() == OK: pass
+				queue.erase(res)
+				res = res.get_resource()
+			else:
+				res = _wait_for_resource(res, path)
 			pending.erase(path)
 			_unlock("return")
 			return res
@@ -144,9 +149,9 @@ func thread_process():
 
 func thread_func(_u):
 	while true:
-		mutex.lock()
+		if mutex: mutex.lock()
 		var should_exit = exit_thread # Protect with Mutex.
-		mutex.unlock()
+		if mutex: mutex.unlock()
 
 		if should_exit:
 			break
@@ -154,6 +159,7 @@ func thread_func(_u):
 
 
 func start():
+	if OS.has_feature("HTML5"): return
 	mutex = Mutex.new()
 	semaphore = Semaphore.new()
 	thread = Thread.new()
@@ -161,14 +167,27 @@ func start():
 
 # Triggered by calling "get_tree().quit()".
 func _exit_tree():
-	mutex.lock()
+	if OS.has_feature("HTML5"): return
+	if mutex: mutex.lock()
 	exit_thread = true # Protect with Mutex.
-	mutex.unlock()
+	if mutex: mutex.unlock()
 
 	# Unblock by posting.
-	semaphore.post()
+	if semaphore: semaphore.post()
 
 	# Wait until it exits.
 	thread.wait_to_finish()
+
+func _process(_delta):
+	if !OS.has_feature("HTML5"): return
+	var started = OS.get_ticks_msec()
+	while queue.size() > 0 and OS.get_ticks_msec() - started < 8:
+		var loader = queue[0]
+		var result = loader.poll()
+		if result != OK:
+			var path = loader.get_meta("path")
+			if path in pending:
+				pending[path] = loader.get_resource() if result == ERR_FILE_EOF else false
+			queue.erase(loader)
 
 func _ready(): start()

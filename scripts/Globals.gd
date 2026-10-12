@@ -656,7 +656,10 @@ var cmdline:Dictionary = {}
 func _ready():
 	var thread = Thread.new()
 	Rhythia.is_init = true
-	thread.start(Rhythia,"do_init")
+	if OS.has_feature("HTML5"):
+		Rhythia.call_deferred("do_init")
+	else:
+		thread.start(Rhythia,"do_init")
 
 	var disable_intro = false
 	var file:File = File.new()
@@ -703,4 +706,4 @@ func _ready():
 		rootg.call_deferred("add_child",fps_disp)
 		fps_visible = true
 	#wait for thread
-	thread.wait_to_finish()
+	if thread.is_active(): thread.wait_to_finish()

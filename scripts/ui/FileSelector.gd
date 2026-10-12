@@ -70,6 +70,9 @@ func open_file(
 ):
 	target_object = obj
 	target_method = method
+	if OS.has_feature("HTML5"):
+		Web.open_files(self, "files_sel", filters, multiselect)
+		return
 	
 	$C/OpenFile.rect_pivot_offset = get_viewport_rect().size / 2
 	$C/OpenFile.rect_scale = Vector2(clamp(Rhythia.render_scale,0.5,1), clamp(Rhythia.render_scale,0.5,1))
@@ -105,6 +108,9 @@ func save_file(
 ):
 	target_object = obj
 	target_method = method
+	if OS.has_feature("HTML5"):
+		Web.save_file(self, "save_sel", filters)
+		return
 	
 	$C/OpenFile.rect_pivot_offset = get_viewport_rect().size / 2
 	$C/OpenFile.rect_scale = Vector2(clamp(Rhythia.render_scale,0.5,1), clamp(Rhythia.render_scale,0.5,1))

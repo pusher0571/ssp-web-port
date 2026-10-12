@@ -377,7 +377,7 @@ valign = 1
 [node name="TimerVP" type="Viewport" parent="."]
 size = Vector2( 900, 300 )
 transparent_bg = true
-msaa = 2
+msaa = 0
 debanding = true
 hdr = false
 usage = 0
@@ -434,7 +434,7 @@ __meta__ = {
 [node name="LeftVP" type="Viewport" parent="."]
 size = Vector2( 300, 900 )
 transparent_bg = true
-msaa = 2
+msaa = 0
 hdr = false
 usage = 0
 render_target_update_mode = 3
@@ -571,7 +571,7 @@ __meta__ = {
 [node name="GiveUpVP" type="Viewport" parent="."]
 size = Vector2( 600, 600 )
 transparent_bg = true
-msaa = 2
+msaa = 0
 debanding = true
 hdr = false
 usage = 0
@@ -620,7 +620,7 @@ stretch_mode = 6
 [node name="RightVP" type="Viewport" parent="."]
 size = Vector2( 300, 900 )
 transparent_bg = true
-msaa = 2
+msaa = 0
 hdr = false
 usage = 0
 render_target_update_mode = 3
@@ -758,7 +758,7 @@ __meta__ = {
 [node name="EnergyVP" type="Viewport" parent="."]
 size = Vector2( 900, 300 )
 transparent_bg = true
-msaa = 2
+msaa = 0
 debanding = true
 hdr = false
 usage = 0
@@ -912,7 +912,7 @@ valign = 1
 [node name="PauseVP" type="Viewport" parent="."]
 size = Vector2( 600, 600 )
 transparent_bg = true
-msaa = 2
+msaa = 0
 debanding = true
 hdr = false
 usage = 0
@@ -979,7 +979,7 @@ __meta__ = {
 [node name="ConfigVP" type="Viewport" parent="."]
 size = Vector2( 600, 600 )
 transparent_bg = true
-msaa = 1
+msaa = 0
 fxaa = true
 hdr = false
 usage = 0
@@ -1187,7 +1187,7 @@ __meta__ = {
 [node name="ComboVP" type="Viewport" parent="."]
 size = Vector2( 600, 600 )
 transparent_bg = true
-msaa = 1
+msaa = 0
 fxaa = true
 hdr = false
 usage = 0
@@ -1215,7 +1215,7 @@ __meta__ = {
 [node name="ApproachVP" type="Viewport" parent="."]
 size = Vector2( 300, 300 )
 transparent_bg = true
-msaa = 1
+msaa = 0
 fxaa = true
 hdr = false
 usage = 0

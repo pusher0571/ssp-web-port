@@ -9,3 +9,9 @@ export_presets.cfg
 addons/discord_game_sdk/bin/**
 
 .vscode/settings.json
+
+.tools/
+dist/
+node_modules/
+hosting/.wrangler/
+!export_presets.cfg

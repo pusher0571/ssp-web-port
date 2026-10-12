@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSP Web Port</title>
+  <link rel="icon" href="index.icon.png">
+  <style>
+    :root { color-scheme: dark; font: 15px system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #080914; color: #f3f1ff; }
+    header { height: 48px; display: flex; align-items: center; gap: 18px; padding: 0 18px; background: #121324; border-bottom: 1px solid #333149; }
+    strong { letter-spacing: .04em; } .badge { color: #b9abff; font-size: 12px; } .spacer { flex: 1; }
+    button, a { color: inherit; } button { padding: 8px 14px; border: 1px solid #524972; border-radius: 6px; background: #28213e; cursor: pointer; }
+    button:hover { background: #45315e; } button:disabled { cursor: wait; opacity: .6; }
+    #canvas { display: block; position: fixed !important; top: 48px !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 48px) !important; outline: none; }
+    #canvas:fullscreen { top: 0 !important; height: 100vh !important; }
+    #overlay { position: fixed; inset: 48px 0 0; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 30%, #2b174c, #080914 70%); }
+    #panel { max-width: 600px; width: 90%; padding: 38px; border: 1px solid #514071; border-radius: 15px; background: #111222e8; box-shadow: 0 30px 100px #0008; }
+    h1 { font-size: 38px; margin: 0 0 14px; } p { color: #c1bcd1; line-height: 1.6; } #start { font-weight: 700; font-size: 18px; padding: 13px 24px; background: #6542ae; }
+    progress { display: block; width: 100%; height: 12px; accent-color: #9e70f3; margin: 24px 0; }
+    #status { min-height: 24px; } small { color: #9d96b4; } #help { position: fixed; top: 60px; right: 16px; max-width: 440px; padding: 22px; border: 1px solid #65527c; border-radius: 10px; background: #141224f5; z-index: 10; }
+    [hidden] { display: none !important; }
+  </style>
+  $GODOT_HEAD_INCLUDE
+</head>
+<body>
+  <header><strong>SSP WEB PORT</strong><span class="badge">PC · Maus &amp; Tastatur</span><span class="spacer"></span><button id="help-button">Hilfe</button><button id="fullscreen">Vollbild</button></header>
+  <canvas id="canvas" tabindex="0">Dein Browser unterstützt kein Canvas.</canvas>
+  <section id="overlay"><div id="panel">
+    <span class="badge">SOUND SPACE PLUS · COMMUNITY WEB PORT</span><h1>Rhythmus. Zielen. Spielen.</h1>
+    <p>Das Originalspiel im Browser. Wähle eine Map im Spiel oder importiere deine eigene SSPM-Datei über <b>Add Map</b>.</p>
+    <p>Maps, Einstellungen und Highscores werden lokal in diesem Browser gespeichert. Das Löschen der Websitedaten entfernt sie.</p>
+    <button id="start">Spiel starten</button><progress id="progress" value="0" max="1" hidden></progress><p id="status" role="status">Der erste Start lädt die Spieldateien herunter.</p>
+    <small>Inoffizieller Port von <a href="https://github.com/Rhythia/sound-space-plus" target="_blank" rel="noopener">Rhythia / Sound Space Plus</a> · <a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode &amp; Lizenz</a></small>
+  </div></section>
+  <aside id="help" hidden><b>So spielst du</b><p>Klicke auf eine Map und starte sie im Spiel. Bewege die Maus, um die Noten zu treffen. Die Tastenbelegung und das Audio-Offset findest du in den Spieleinstellungen.</p><p><b>Import:</b> Add Map → SSPM; alternativ Text-Map plus MP3/OGG. Vulnus-Archive zuerst im Desktop-Spiel zu SSPM konvertieren.</p><p>ESC gibt die Maus frei. Vollbild über den Button oben. Einstellungen und Bestleistungen bleiben in diesem Browser gespeichert.</p><button id="close-help">Schließen</button></aside>
+  <input id="file-input" type="file" hidden>
+  <script src="proxy-config.js"></script>
+  <script src="$GODOT_URL"></script>
+  <script>
+    const engine = new Engine($GODOT_CONFIG);
+    const canvas = document.getElementById('canvas');
+    const status = document.getElementById('status');
+    window.sspFiles = [];
+    window.sspChoose = (extensions, multiple) => {
+      const input = document.getElementById('file-input');
+      input.value = ''; input.accept = extensions.join(','); input.multiple = multiple;
+      input.onchange = async () => {
+        try {
+          const files = Array.from(input.files || []);
+          if (files.some(file => file.size > 128 * 1024 * 1024)) throw new Error('Maximal 128 MB pro Importdatei.');
+          window.sspFiles = await Promise.all(files.map(async file => ({ name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) })));
+          window.sspFileCallback(); canvas.focus();
+        } catch (error) { window.sspFiles = []; window.sspFileCallback(); alert('Import fehlgeschlagen: ' + error.message); }
+      };
+      input.oncancel = () => { window.sspFiles = []; window.sspFileCallback(); canvas.focus(); };
+      input.click();
+    };
+    document.getElementById('start').onclick = async () => {
+      document.getElementById('start').disabled = true;
+      document.getElementById('progress').hidden = false;
+      status.textContent = 'Spiel wird geladen …';
+      try {
+        await engine.startGame({ canvas, canvasResizePolicy: 2, onProgress: (current, total) => {
+          document.getElementById('progress').value = total ? current / total : 0;
+          status.textContent = total ? 'Lädt … ' + Math.round(current / total * 100) + '%' : 'Spieldateien werden geladen …';
+        }, onPrint: (...args) => console.log(...args), onPrintError: (...args) => console.error(...args) });
+        document.getElementById('overlay').hidden = true; canvas.focus();
+      } catch (error) { status.textContent = 'Start fehlgeschlagen: ' + error.message + ' — Bitte Seite neu laden.'; }
+    };
+    document.getElementById('fullscreen').onclick = async () => { try { await canvas.requestFullscreen(); canvas.focus(); } catch (error) { alert(error.message); } };
+    document.getElementById('help-button').onclick = () => { document.getElementById('help').hidden = !document.getElementById('help').hidden; };
+    document.getElementById('close-help').onclick = () => { document.getElementById('help').hidden = true; canvas.focus(); };
+    canvas.addEventListener('contextmenu', event => event.preventDefault());
+  </script>
+</body>
+</html>

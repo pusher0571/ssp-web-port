@@ -25,11 +25,6 @@ _global_script_classes=[ {
 "path": "res://scripts/cursordance/Bouncy.gd"
 }, {
 "base": "Resource",
-"class": "ChatMessage",
-"language": "GDScript",
-"path": "res://addons/discord_game_sdk/example/lobby/chat_message.gd"
-}, {
-"base": "Resource",
 "class": "ColorSet",
 "language": "GDScript",
 "path": "res://scripts/content/game/ColorSet.gd"
@@ -49,95 +44,15 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/cursordance/Directional.gd"
 }, {
-"base": "Reference",
-"class": "DiscordActivity",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_activity.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordActivityAssets",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_activity_assets.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordActivityManager",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_activity_manager.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordActivityParty",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_activity_party.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordActivitySecrets",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_activity_secrets.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordActivityTimestamps",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_activity_timestamps.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordCore",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_core.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordLobby",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_lobby.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordLobbyManager",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_lobby_manager.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordLobbyTransaction",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_lobby_transaction.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordOverlayManager",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_overlay_manager.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordPartySize",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_party_size.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordResult",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_result.gdns"
-}, {
-"base": "Reference",
-"class": "DiscordUser",
-"language": "NativeScript",
-"path": "res://addons/discord_game_sdk/discord_user.gdns"
-}, {
 "base": "ColorRect",
 "class": "FileSelector2D",
 "language": "GDScript",
 "path": "res://scripts/ui/FileSelector.gd"
 }, {
-"base": "Resource",
-"class": "GameState",
-"language": "GDScript",
-"path": "res://addons/discord_game_sdk/example/lobby/game_state.gd"
-}, {
 "base": "Node",
 "class": "ImageLoader",
 "language": "GDScript",
 "path": "res://scripts/content/resources/ImageLoader.gd"
-}, {
-"base": "Resource",
-"class": "Member",
-"language": "GDScript",
-"path": "res://addons/discord_game_sdk/example/lobby/member.gd"
 }, {
 "base": "DanceMover",
 "class": "MomentumDanceMover",
@@ -213,29 +128,12 @@ _global_script_class_icons={
 "AudioLoader": "",
 "BackgroundWorld": "",
 "BouncyDanceMover": "",
-"ChatMessage": "",
 "ColorSet": "",
 "ConfirmationPrompt2D": "",
 "DanceMover": "",
 "DirectionalDanceMover": "",
-"DiscordActivity": "",
-"DiscordActivityAssets": "",
-"DiscordActivityManager": "",
-"DiscordActivityParty": "",
-"DiscordActivitySecrets": "",
-"DiscordActivityTimestamps": "",
-"DiscordCore": "",
-"DiscordLobby": "",
-"DiscordLobbyManager": "",
-"DiscordLobbyTransaction": "",
-"DiscordOverlayManager": "",
-"DiscordPartySize": "",
-"DiscordResult": "",
-"DiscordUser": "",
 "FileSelector2D": "",
-"GameState": "",
 "ImageLoader": "",
-"Member": "",
 "MomentumDanceMover": "",
 "Note": "",
 "NoteEffect": "",
@@ -274,7 +172,7 @@ config/default_menu_target.editor="res://scenes/menu/menu2.tscn"
 config/7zip_binary_path=""
 config/7zip_binary_path.Windows="install_dir/util/7z.exe"
 config/7zip_binary_path.X11="install_dir/util/7zz"
-config/auto_maximize=true
+config/auto_maximize=false
 config/auto_maximize.editor=false
 config/use_custom_user_dir.Android=false
 config/discord_rpc.OSX=false
@@ -291,13 +189,13 @@ networking/enabled=true
 networking/mapdb_api="https://cdn.rhythia.net/index.json"
 networking/test_url="https://google.com"
 config/discord_rpc.HTML5=false
-config/enable_new_content_mgr.HTML5=false
-config/disable_native_file_dialogs=false
+config/enable_new_content_mgr.HTML5=true
+config/disable_native_file_dialogs=true
 config/disable_native_file_dialogs.Android=true
 config/disable_native_file_dialogs.web=true
 config/disable_native_file_dialogs.OSX=true
 config/is_using_controller=true
-config/discord_rpc=true
+config/discord_rpc=false
 config/discord_rpc.editor=false
 networking/github_repo="Rhythia/sound-space-plus"
 
@@ -314,7 +212,8 @@ Rhythia="*res://scripts/Rhythia.gd"
 RQueue="*res://scripts/content/resources/ResourceQueue.gd"
 Dance="*res://scripts/cursordance/Dance.gd"
 SFXManager="*res://scripts/game/SFXManager.gd"
-Discord="*res://addons/discord_game_sdk/discord.gd"
+Discord="*res://scripts/web/DiscordStub.gd"
+Web="*res://scripts/web/Web.gd"
 
 [debug]
 
@@ -331,18 +230,19 @@ settings/change_time_per_screen=true
 
 window/size/width=1280
 window/size/height=720
-window/vsync/use_vsync=false
 window/handheld/orientation="sensor_landscape"
+window/stretch/mode="2d"
+window/stretch/aspect="expand"
 window/stretch/mode.mobile="2d"
 window/stretch/aspect.mobile="keep_height"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/discord_game_sdk/plugin.cfg", "res://addons/godot-openvr/plugin.cfg" )
+enabled=PoolStringArray(  )
 
 [gdnative]
 
-singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib" ]
+singletons=[  ]
 
 [gui]
 
@@ -527,7 +427,7 @@ menu_quickbar={
 
 [locale]
 
-translations=PoolStringArray( "res://localization/localization.csv", "res://localization/localization.en.translation", "res://localization/localization.fr.translation", "res://localization/localization.ja.translation", "res://localization/localization.pl.translation", "res://localization/localization.es.translation", "res://localization/localization.it.translation" )
+translations=PoolStringArray( "res://localization/localization.en.translation", "res://localization/localization.fr.translation", "res://localization/localization.ja.translation", "res://localization/localization.pl.translation", "res://localization/localization.es.translation", "res://localization/localization.it.translation" )
 locale_filter=[ 0, [ "en", "ja" ] ]
 
 [logging]
@@ -545,8 +445,9 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
+quality/driver/driver_name="GLES2"
 quality/driver/fallback_to_gles2=true
-threads/thread_model=2
+threads/thread_model=0
 vram_compression/import_etc=true
 quality/directional_shadow/size=1024
 quality/directional_shadow/size.mobile=512
@@ -558,5 +459,4 @@ quality/filters/anisotropic_filter_level=2
 2d/options/use_software_skinning=false
 quality/lightmapping/use_bicubic_sampling=false
 environment/default_clear_color=Color( 0, 0, 0, 1 )
-quality/filters/msaa=1
 environment/default_environment="res://default_env.tres"

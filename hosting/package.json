@@ -1,0 +1,7 @@
+{
+  "name": "ssp-web-port-map-proxy",
+  "private": true,
+  "type": "module",
+  "scripts": { "deploy": "wrangler deploy", "test": "node --test test/*.test.mjs" },
+  "devDependencies": { "wrangler": "4.45.3" }
+}

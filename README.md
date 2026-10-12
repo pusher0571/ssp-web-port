@@ -1,3 +1,38 @@
+# SSP Web Port
+
+**Spielen: https://pusher0571.github.io/ssp-web-port/**
+
+Inoffizieller Browser-Port von Rhythia / Sound Space Plus für PC mit Maus und Tastatur.
+Die Website läuft auf GitHub Pages; Map-Downloads laufen über einen Cloudflare Worker im kostenlosen Tarif. Der PC des Besitzers muss dafür nicht eingeschaltet sein.
+
+- Drei eingebaute Maps und der mitgelieferte Rhythia-Katalog.
+- SSPM-Import sowie Text-Maps mit MP3/OGG über den Content Manager.
+- Einstellungen, importierte Maps und Bestleistungen bleiben lokal im jeweiligen Browser.
+- Keine Installation, kein Hosting-Account für Spieler erforderlich.
+
+Vulnus-ZIP- und alte SSPMR-Archive müssen zuerst im Desktop-Spiel zu SSPM konvertiert werden. VR und native Discord-Integration sind im Web deaktiviert. Der erste Start lädt ungefähr 163 MiB; Audio-Offset kann in den Spieleinstellungen angepasst werden. Browserdaten nicht löschen, wenn lokale Maps und Scores erhalten bleiben sollen.
+
+## Bauen und aktualisieren
+
+Jeder Push auf `main` baut das Spiel mit Godot 3.6.2 und veröffentlicht es automatisch über `.github/workflows/web.yml` auf GitHub Pages. `dist/` und Export-Templates sind nicht Teil der Git-Historie.
+
+Für einen lokalen Build die offiziellen Godot-3.6.2-Export-Templates herunterladen und `templates/webassembly_release.zip` und `templates/webassembly_debug.zip` nach `.tools/` entpacken. Anschließend:
+
+```sh
+python tools/build_web.py --godot /absoluter/pfad/zu/godot
+python -m http.server 8000 --directory dist
+```
+
+Dann http://localhost:8000 öffnen. Die HTML-Datei braucht einen HTTP-Server.
+
+Der Map-Vermittler steht unter `hosting/`. Zum Aktualisieren dort `npm ci`, `npx wrangler login` und `npx wrangler deploy` ausführen. Eine neue Worker-Adresse in `web/proxy-config.js` eintragen und auf `main` pushen. Der Worker akzeptiert nur Lesezugriffe auf den festen Rhythia-CDN und speichert keine Spielstände. Tests: `node --test hosting/test/worker.test.mjs`.
+
+GitHub Pages und Cloudflare Workers haben kostenlose Nutzungslimits. Das Projekt aktiviert keinen kostenpflichtigen Tarif. Online-Maps sind zusätzlich von der Verfügbarkeit des ursprünglichen Rhythia-CDN abhängig. Der Katalog liegt als Momentaufnahme in `assets/web/map-index.json`; er kann durch die aktuelle `https://cdn.rhythia.net/index.json` ersetzt werden.
+
+Quellcode und Lizenz stammen vom [Originalprojekt](https://github.com/Rhythia/sound-space-plus). Die ursprüngliche README folgt unten.
+
+---
+
 # Sound Space Plus
 > "Rhyt-Rhythmia"
 >
