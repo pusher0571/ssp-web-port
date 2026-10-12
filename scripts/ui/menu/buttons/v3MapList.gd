@@ -396,17 +396,17 @@ func pg_down():
 	tween_in(btn)
 
 func tween_out(p:Panel):
-	var tween = get_tree().create_tween()
+	var tween = create_tween()
 	tween.tween_property(p, "rect_min_size", Vector2(size_x - (page_size/2) * 10, 0), 0.2)
 	tween.tween_callback(p, "queue_free")
 
 func tween_in(p:Panel):
-	var tween = get_tree().create_tween()
+	var tween = create_tween()
 	tween.tween_property(p, "rect_min_size", Vector2(size_x - (next_index() - prev_index())/2 * 10, 90), 0.2)
 
 func tween_length():
 	for i in btns.size():
-		var tween = get_tree().create_tween()
+		var tween = create_tween()
 		tween.tween_property(btns[i], "rect_min_size", Vector2(size_x-(15*(abs((next_index() - prev_index())/2-i))), 90), 0.15)
 	
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=85 format=2]
+[gd_scene load_steps=86 format=2]
 
 [ext_resource path="res://uitheme.tres" type="Theme" id=1]
 [ext_resource path="res://assets/font/Lato/Lato-Regular.ttf" type="DynamicFontData" id=2]
@@ -59,6 +59,8 @@
 [ext_resource path="res://scripts/ui/settings/CursorTrailType.gd" type="Script" id=62]
 [ext_resource path="res://scripts/ui/settings/NoteOpacity.gd" type="Script" id=63]
 [ext_resource path="res://scripts/ui/settings/RenderScale.gd" type="Script" id=66]
+
+[ext_resource path="res://scripts/ui/settings/SettingsCodes.gd" type="Script" id=67]
 
 [sub_resource type="StyleBoxLine" id=55]
 color = Color( 0.690196, 0.690196, 0.690196, 0.588235 )
@@ -245,6 +247,13 @@ custom_colors/font_color_pressed = Color( 0, 0, 0, 1 )
 text = "Select Profile"
 flat = false
 script = ExtResource( 18 )
+
+[node name="SettingsCodes" type="Button" parent="TopButtons/TopButtonsHBox"]
+rect_min_size = Vector2( 140, 0 )
+hint_tooltip = "Export your settings as a code, or import a shared code."
+theme = ExtResource( 1 )
+text = "Settings Codes"
+script = ExtResource( 67 )
 
 [node name="UserDir" type="Button" parent="TopButtons/TopButtonsHBox"]
 margin_left = 220.0

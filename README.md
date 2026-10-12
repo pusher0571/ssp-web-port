@@ -17,6 +17,12 @@ Alternativ: Text-Map mit MP3/OGG. Vulnus-ZIP und alte Map-Packs sind im Web nich
 
 Maps, Einstellungen und Highscores bleiben im lokalen Browserspeicher. Imports werden nicht zum Host hochgeladen. Updates behalten bereits importierte Maps; das Löschen der Websitedaten entfernt sie.
 
+## Settings-Codes
+
+Im Spiel: **Settings → Settings Codes**. Der Exportcode enthält das aktuelle Setup, etwa Empfindlichkeit, Audio-Offset, Lautstärke, Grafik, Cursor und HUD-Farben. **Copy code** kopiert ihn zum Teilen oder als Backup. In einem anderen Browser den Code einfügen und **Import settings** wählen. Der Import wird geprüft und automatisch gespeichert; **Undo last import** stellt das vorherige Setup während derselben Sitzung wieder her.
+
+Maps, Highscores und Dateien sind nicht im Code enthalten. Für ausgewählte Custom-Assets müssen die passenden Dateien im Zielbrowser bereits installiert sein; andernfalls bleibt die dortige Auswahl erhalten. Vollbild- und andere plattformabhängige oder entfernte Funktionen werden nicht übertragen.
+
 ## Browser und Audio
 
 Godot 3.6.2, WebGL, Threads und AudioWorklet; Audio-Puffer 60 ms. Die Noten folgen der Audiozeit, ohne die Musik zur laufenden Synchronisierung neu zu starten. Der persönliche Audio-Offset ist im Spiel einstellbar.

@@ -1,0 +1,13 @@
+#settings-codes { width: min(680px, calc(100vw - 40px)); max-height: calc(100vh - 80px); overflow: auto; border: 1px solid #55516c; border-radius: 12px; padding: 24px; background: #11121e; color: #f1f1fa; box-shadow: 0 24px 100px #000a; }
+#settings-codes::backdrop { background: #060713c9; }
+#settings-codes h2 { font: 900 26px Lato, sans-serif; margin: 0 0 10px; }
+#settings-codes h3 { margin: 18px 0 8px; font-size: 16px; }
+#settings-codes p { margin: 8px 0; font-size: 14px; line-height: 1.45; }
+#settings-codes label { display: block; margin: 8px 0; color: #c1c0d3; }
+#settings-codes textarea { display: block; width: 100%; min-height: 72px; padding: 10px; resize: vertical; border: 1px solid #4c485d; border-radius: 6px; background: #090a12; color: #e1dcf2; font: 12px/1.5 ui-monospace, monospace; overflow-wrap: anywhere; }
+#settings-codes textarea:focus { outline: 2px solid #74c1ec; outline-offset: 2px; }
+#settings-codes button { margin-top: 12px; }
+#settings-code-import { background: #773253; border-color: #c9509e; }
+#settings-code-status { min-height: 36px; margin-top: 16px !important; color: #a8d9f5; }
+#settings-code-status[data-error="true"] { color: #ffadbe; }
+.settings-code-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; }

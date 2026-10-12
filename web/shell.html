@@ -26,6 +26,7 @@
     #import-overlay { position: fixed; inset: 48px 0 0; display: grid; place-items: center; background: #080914d9; z-index: 9; }
   </style>
   <link rel="stylesheet" href="landing.css">
+  <link rel="stylesheet" href="settings-codes.css">
   $GODOT_HEAD_INCLUDE
 </head>
 <body class="pregame">
@@ -82,10 +83,26 @@
   <dialog id="help" class="menu-dialog" aria-labelledby="help-title"><h2 id="help-title">So spielst du</h2><p><b>1. Deine Map importieren</b><br>Spiel starten → Plus-Symbol links → Content Manager → Sound Space Plus Map. Wähle eine eigene <code>.sspm</code>-Datei. Alternativ: Text-Map plus MP3/OGG.</p><p><b>2. In den Rhythmus kommen</b><br>Map auswählen und starten. Ein Klick auf „Spielen / Fortsetzen“ fängt die Maus ein. Bewege sie, um die Noten zu treffen.</p><p><kbd>ESC</kbd> pausiert und gibt die Maus frei. Empfindlichkeit und Audio-Offset findest du in den Spieleinstellungen.</p><p>Deine Imports bleiben lokal in diesem Browser gespeichert. Das Löschen der Websitedaten entfernt sie. Importiere nur Dateien, die du verwenden darfst.</p><button id="close-help" autofocus>Alles klar</button></dialog>
   <dialog id="credits" class="menu-dialog" aria-labelledby="credits-title"><h2 id="credits-title">Credits</h2><p>Ein inoffizieller Browser-Port von <a href="https://github.com/Rhythia/sound-space-plus" target="_blank" rel="noopener">Rhythia / Sound Space Plus</a>.</p><p>Originaler Spielcode: Basil und die Rhythia-Contributors.<br>Web-Port: pusher0571.</p><p>Der Spielcode steht unter der MIT-Lizenz. Copyright- und weitere Lizenzhinweise findest du im <a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode</a>.</p><p>Keine mitgelieferten Songs, kein Online-Katalog. Deine Musik und Maps werden ausschließlich lokal verarbeitet.</p><button id="close-credits" autofocus>Zurück</button></dialog>
   <section id="capture-overlay" hidden><div class="capture-panel"><h2>Bereit?</h2><p>Das Spiel fängt deine Maus ein, damit du frei zielen kannst.</p><button id="capture-button">Spielen / Fortsetzen</button> <button id="leave-game">Zur Map-Auswahl</button><p id="capture-status">ESC pausiert das Spiel und gibt die Maus frei.</p></div></section>
+  <dialog id="settings-codes" aria-labelledby="settings-codes-title" lang="en">
+    <h2 id="settings-codes-title">Settings Codes</h2>
+    <p>Share your setup or bring it to another browser. Codes contain settings only.</p>
+    <h3>Export your setup</h3>
+    <label for="settings-export-code">Your current settings code</label>
+    <textarea id="settings-export-code" rows="3" readonly spellcheck="false"></textarea>
+    <button id="settings-code-copy">Copy code</button>
+    <h3>Import a setup</h3>
+    <label for="settings-import-code">Paste an SSP settings code</label>
+    <textarea id="settings-import-code" rows="3" maxlength="32768" spellcheck="false" placeholder="SSP1:…"></textarea>
+    <p>Import replaces the settings in the code and saves them in this browser. Custom assets must already be installed here.</p>
+    <button id="settings-code-import">Import settings</button>
+    <p id="settings-code-status" role="status" aria-live="polite"></p>
+    <div class="settings-code-footer"><button id="settings-code-undo" hidden>Undo last import</button><button id="settings-code-close">Close</button></div>
+  </dialog>
   <input id="file-input" type="file" hidden>
   <section id="import-overlay" hidden><div class="capture-panel"><h2>Lokale Dateien importieren</h2><p>Die Dateien bleiben in diesem Browser.</p><button id="choose-files">Dateien wählen</button> <button id="cancel-import">Abbrechen</button></div></section>
   <script src="runtime.js"></script>
   <script src="landing.js"></script>
+  <script src="settings-codes.js"></script>
   <script src="$GODOT_URL"></script>
   <script>
     const engine = new Engine($GODOT_CONFIG);
