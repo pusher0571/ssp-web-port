@@ -1,17 +1,12 @@
 build/**
 !build/.gdignore
-android/**
-export_presets.cfg
 .import/
 .godot/
 *.translation
 .mono/
-addons/discord_game_sdk/bin/**
 
 .vscode/settings.json
 
 .tools/
 dist/
 node_modules/
-hosting/.wrangler/
-!export_presets.cfg

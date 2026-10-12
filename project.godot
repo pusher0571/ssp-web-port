@@ -94,11 +94,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/content/Registry.gd"
 }, {
-"base": "Resource",
-"class": "Replay",
-"language": "GDScript",
-"path": "res://scripts/content/game/Replay.gd"
-}, {
 "base": "DanceMover",
 "class": "SimpleDanceMover",
 "language": "GDScript",
@@ -118,11 +113,6 @@ _global_script_classes=[ {
 "class": "StringPrompt2D",
 "language": "GDScript",
 "path": "res://scripts/ui/StringPrompt2D.gd"
-}, {
-"base": "Spatial",
-"class": "VRPlayer",
-"language": "GDScript",
-"path": "res://vr/VRPlayer.gd"
 } ]
 _global_script_class_icons={
 "AudioLoader": "",
@@ -142,12 +132,10 @@ _global_script_class_icons={
 "Notify2D": "",
 "ObjParse": "",
 "Registry": "",
-"Replay": "",
 "SimpleDanceMover": "",
 "Song": "",
 "SongPlayerManager": "",
-"StringPrompt2D": "",
-"VRPlayer": ""
+"StringPrompt2D": ""
 }
 
 [application]
@@ -164,50 +152,37 @@ config/icon="res://assets/images/branding/icon.png"
 config/windows_native_icon="res://icon.ico"
 config/quit_on_go_back=false
 config/version="jun15-2026rc"
-config/autoload_map_registries="test maps|res://test_assets/test_maps.sspmr;built in|res://content/songs/built_in_maps.sspmr"
+config/autoload_map_registries=""
 config/enable_new_content_mgr=true
 config/default_menu_target="res://scenes/menu/menu2.tscn"
-config/default_menu_target.mobile="res://scenes/menu/menu2.tscn"
 config/default_menu_target.editor="res://scenes/menu/menu2.tscn"
 config/7zip_binary_path=""
-config/7zip_binary_path.Windows="install_dir/util/7z.exe"
-config/7zip_binary_path.X11="install_dir/util/7zz"
 config/auto_maximize=false
 config/auto_maximize.editor=false
-config/use_custom_user_dir.Android=false
-config/discord_rpc.OSX=false
 config/save_dir="user://"
-config/save_dir.Android="user://"
 config/fov=70.0
-config/enable_new_content_mgr.mobile=false
-config/discord_rpc.mobile=false
-config/replays=true
-config/replays.editor=true
+config/replays=false
+config/replays.editor=false
 config/show_trail_debug=false
-config/project_settings_override.standalone="user://override.cfg"
-networking/enabled=true
-networking/mapdb_api="https://cdn.rhythia.net/index.json"
-networking/test_url="https://google.com"
+networking/enabled=false
 config/discord_rpc.HTML5=false
 config/enable_new_content_mgr.HTML5=true
 config/disable_native_file_dialogs=true
-config/disable_native_file_dialogs.Android=true
 config/disable_native_file_dialogs.web=true
-config/disable_native_file_dialogs.OSX=true
 config/is_using_controller=true
 config/discord_rpc=false
 config/discord_rpc.editor=false
-networking/github_repo="Rhythia/sound-space-plus"
 
 [audio]
 
+output_latency.web=60
 channel_disable_threshold_db=-240.0
 channel_disable_time=15.0
 
 [autoload]
 
 Globals="*res://scripts/Globals.gd"
-Online="*res://scripts/Online.gd"
+Online="*res://scripts/web/OnlineStub.gd"
 Rhythia="*res://scripts/Rhythia.gd"
 RQueue="*res://scripts/content/resources/ResourceQueue.gd"
 Dance="*res://scripts/cursordance/Dance.gd"
@@ -233,8 +208,6 @@ window/size/height=720
 window/handheld/orientation="sensor_landscape"
 window/stretch/mode="2d"
 window/stretch/aspect="expand"
-window/stretch/mode.mobile="2d"
-window/stretch/aspect.mobile="keep_height"
 
 [editor_plugins]
 
@@ -450,9 +423,7 @@ quality/driver/fallback_to_gles2=true
 threads/thread_model=0
 vram_compression/import_etc=true
 quality/directional_shadow/size=1024
-quality/directional_shadow/size.mobile=512
 quality/shadow_atlas/size=2048
-quality/shadow_atlas/size.mobile=1024
 quality/shadows/filter_mode=0
 quality/reflections/texture_array_reflections=false
 quality/filters/anisotropic_filter_level=2

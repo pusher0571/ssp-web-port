@@ -3,21 +3,41 @@ extends Node
 var callback
 var receiver: Object
 var receiver_method: String
-var proxy_base: String = ""
 var serial: int = 0
+var pointer_callback
+var exit_callback
+var pointer_locked: bool = false
+var game: Node
 
 func _ready():
 	if !OS.has_feature("HTML5"): return
 	callback = JavaScript.create_callback(self, "_files_received")
 	JavaScript.get_interface("window").sspFileCallback = callback
-	var configured = JavaScript.eval("window.SSP_PROXY || ''", true)
-	if configured is String: proxy_base = configured.trim_suffix("/")
+	pointer_callback = JavaScript.create_callback(self, "_pointer_changed")
+	JavaScript.get_interface("window").sspPointerCallback = pointer_callback
+	exit_callback = JavaScript.create_callback(self, "_exit_game")
+	JavaScript.get_interface("window").sspExitCallback = exit_callback
 	pause_mode = PAUSE_MODE_PROCESS
 
-func proxy_url(url: String) -> String:
-	if proxy_base != "" and url.begins_with("https://cdn.rhythia.net/"):
-		return proxy_base + url.trim_prefix("https://cdn.rhythia.net")
-	return url
+func begin_game(target: Node):
+	game = target
+	pointer_locked = false
+	JavaScript.eval("window.sspSetGameActive(true)", true)
+
+func end_game(target: Node):
+	if game != target: return
+	game = null
+	pointer_locked = false
+	JavaScript.eval("window.sspSetGameActive(false)", true)
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func _pointer_changed(args):
+	if !is_instance_valid(game): return
+	pointer_locked = bool(args[0])
+	game.web_pointer_changed(pointer_locked)
+
+func _exit_game(_args):
+	if is_instance_valid(game): game.end(Globals.END_GIVEUP)
 
 func open_files(target: Object, method: String, filters: PoolStringArray, multiple: bool):
 	receiver = target

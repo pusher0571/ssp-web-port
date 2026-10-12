@@ -21,6 +21,9 @@
     progress { display: block; width: 100%; height: 12px; accent-color: #9e70f3; margin: 24px 0; }
     #status { min-height: 24px; } small { color: #9d96b4; } #help { position: fixed; top: 60px; right: 16px; max-width: 440px; padding: 22px; border: 1px solid #65527c; border-radius: 10px; background: #141224f5; z-index: 10; }
     [hidden] { display: none !important; }
+    #capture-overlay { position: fixed; inset: 48px 0 0; display: grid; place-items: center; background: #080914d9; z-index: 8; }
+    .capture-panel { width: min(90%, 460px); padding: 30px; text-align: center; background: #171328; border: 1px solid #65527c; border-radius: 12px; }
+    #import-overlay { position: fixed; inset: 48px 0 0; display: grid; place-items: center; background: #080914d9; z-index: 9; }
   </style>
   $GODOT_HEAD_INCLUDE
 </head>
@@ -29,14 +32,16 @@
   <canvas id="canvas" tabindex="0">Dein Browser unterstützt kein Canvas.</canvas>
   <section id="overlay"><div id="panel">
     <span class="badge">SOUND SPACE PLUS · COMMUNITY WEB PORT</span><h1>Rhythmus. Zielen. Spielen.</h1>
-    <p>Das Originalspiel im Browser. Wähle eine Map im Spiel oder importiere deine eigene SSPM-Datei über <b>Add Map</b>.</p>
+    <p>Importiere eine eigene SSPM-Datei über das Plus-Symbol im <b>Content Manager</b>. Musik und Maps werden ausschließlich lokal verarbeitet.</p>
     <p>Maps, Einstellungen und Highscores werden lokal in diesem Browser gespeichert. Das Löschen der Websitedaten entfernt sie.</p>
     <button id="start">Spiel starten</button><progress id="progress" value="0" max="1" hidden></progress><p id="status" role="status">Der erste Start lädt die Spieldateien herunter.</p>
     <small>Inoffizieller Port von <a href="https://github.com/Rhythia/sound-space-plus" target="_blank" rel="noopener">Rhythia / Sound Space Plus</a> · <a href="https://github.com/pusher0571/ssp-web-port" target="_blank" rel="noopener">Quellcode &amp; Lizenz</a></small>
   </div></section>
-  <aside id="help" hidden><b>So spielst du</b><p>Klicke auf eine Map und starte sie im Spiel. Bewege die Maus, um die Noten zu treffen. Die Tastenbelegung und das Audio-Offset findest du in den Spieleinstellungen.</p><p><b>Import:</b> Add Map → SSPM; alternativ Text-Map plus MP3/OGG. Vulnus-Archive zuerst im Desktop-Spiel zu SSPM konvertieren.</p><p>ESC gibt die Maus frei. Vollbild über den Button oben. Einstellungen und Bestleistungen bleiben in diesem Browser gespeichert.</p><button id="close-help">Schließen</button></aside>
+  <aside id="help" hidden><b>So spielst du</b><p>Importiere eine Map über das Plus-Symbol, wähle sie aus und klicke auf Start. Ein weiterer Klick auf Spielen fängt die Maus ein. Bewege sie, um die Noten zu treffen. Empfindlichkeit und Audio-Offset findest du in den Spieleinstellungen.</p><p><b>Import:</b> Content Manager → Sound Space Plus Map; alternativ Text-Map plus MP3/OGG. Importiere nur Dateien, die du verwenden darfst.</p><p>ESC pausiert und gibt die Maus frei. Zum Fortsetzen auf Spielen klicken. Es gibt keine eingebauten Songs, Online-Downloads oder Replays.</p><button id="close-help">Schließen</button></aside>
+  <section id="capture-overlay" hidden><div class="capture-panel"><h2>Bereit?</h2><p>Das Spiel fängt deine Maus ein, damit du frei zielen kannst.</p><button id="capture-button">Spielen / Fortsetzen</button> <button id="leave-game">Zur Map-Auswahl</button><p id="capture-status">ESC pausiert das Spiel und gibt die Maus frei.</p></div></section>
   <input id="file-input" type="file" hidden>
-  <script src="proxy-config.js"></script>
+  <section id="import-overlay" hidden><div class="capture-panel"><h2>Lokale Dateien importieren</h2><p>Die Dateien bleiben in diesem Browser.</p><button id="choose-files">Dateien wählen</button> <button id="cancel-import">Abbrechen</button></div></section>
+  <script src="runtime.js"></script>
   <script src="$GODOT_URL"></script>
   <script>
     const engine = new Engine($GODOT_CONFIG);
@@ -46,22 +51,26 @@
     window.sspChoose = (extensions, multiple) => {
       const input = document.getElementById('file-input');
       input.value = ''; input.accept = extensions.join(','); input.multiple = multiple;
+      document.getElementById('import-overlay').hidden = false;
       input.onchange = async () => {
         try {
           const files = Array.from(input.files || []);
           if (files.some(file => file.size > 128 * 1024 * 1024)) throw new Error('Maximal 128 MB pro Importdatei.');
           window.sspFiles = await Promise.all(files.map(async file => ({ name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) })));
+          document.getElementById('import-overlay').hidden = true;
           window.sspFileCallback(); canvas.focus();
         } catch (error) { window.sspFiles = []; window.sspFileCallback(); alert('Import fehlgeschlagen: ' + error.message); }
       };
-      input.oncancel = () => { window.sspFiles = []; window.sspFileCallback(); canvas.focus(); };
-      input.click();
+      input.oncancel = () => { window.sspFiles = []; document.getElementById('import-overlay').hidden = true; window.sspFileCallback(); canvas.focus(); };
     };
+    document.getElementById('choose-files').onclick = () => document.getElementById('file-input').click();
+    document.getElementById('cancel-import').onclick = () => document.getElementById('file-input').oncancel();
     document.getElementById('start').onclick = async () => {
       document.getElementById('start').disabled = true;
       document.getElementById('progress').hidden = false;
       status.textContent = 'Spiel wird geladen …';
       try {
+        if (!await window.sspEnsureIsolation()) return;
         await engine.startGame({ canvas, canvasResizePolicy: 2, onProgress: (current, total) => {
           document.getElementById('progress').value = total ? current / total : 0;
           status.textContent = total ? 'Lädt … ' + Math.round(current / total * 100) + '%' : 'Spieldateien werden geladen …';
@@ -73,6 +82,14 @@
     document.getElementById('help-button').onclick = () => { document.getElementById('help').hidden = !document.getElementById('help').hidden; };
     document.getElementById('close-help').onclick = () => { document.getElementById('help').hidden = true; canvas.focus(); };
     canvas.addEventListener('contextmenu', event => event.preventDefault());
+    if (!window.crossOriginIsolated) {
+      document.getElementById('start').disabled = true;
+      status.textContent = 'Browser wird für die Audio-Ausgabe vorbereitet …';
+      window.sspEnsureIsolation().catch(error => {
+        status.textContent = error.message;
+        document.getElementById('start').disabled = false;
+      });
+    }
   </script>
 </body>
 </html>

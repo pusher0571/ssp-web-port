@@ -71,16 +71,6 @@ func finish():
 	
 	Rhythia.load_color_txt()
 	
-	if Input.is_key_pressed(KEY_L):
-		Rhythia.replaying = true
-		Rhythia.replay = Replay.new()
-	
-	if Rhythia.replaying:
-		Rhythia.save_current_state()
-		Rhythia.replay.connect("progress",self,"progress")
-		Rhythia.replay.read_data(Rhythia.replay_path)
-		yield(Rhythia.replay,"done_loading")
-	
 	black_fade_target = true
 	yield(get_tree().create_timer(0.5),"timeout")
 

@@ -114,13 +114,10 @@ func reposition(ms:float,approachSpeed:float):
 		return !(state == Globals.NSTATE_ACTIVE and sign(approachSpeed) == 1 and current_dist > 100)
 
 func check(cpos:Vector3,prevpos:Vector3=Vector3.ZERO):
-	if Rhythia.replaying and Rhythia.replay.sv != 1:
-		return Rhythia.replay.should_hit(id)
-	else:
-		var hbs:float = Rhythia.note_hitbox_size/2
-		if hbs == 0.57: hbs = 0.56875 # 1.1375
-		var ori:Vector3 = transform.origin
-		return (cpos.x <= ori.x + hbs and cpos.x >= ori.x - hbs) and (cpos.y <= ori.y + hbs and cpos.y >= ori.y - hbs)
+	var hbs:float = Rhythia.note_hitbox_size/2
+	if hbs == 0.57: hbs = 0.56875 # 1.1375
+	var ori:Vector3 = transform.origin
+	return (cpos.x <= ori.x + hbs and cpos.x >= ori.x - hbs) and (cpos.y <= ori.y + hbs and cpos.y >= ori.y - hbs)
 
 func setup(color:Color):
 	var tcol = Color(color.r,color.g,color.b,Rhythia.note_opacity)

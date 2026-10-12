@@ -9,8 +9,7 @@ onready var pages:Array = [
 	get_node("../Main/Settings"),
 	get_node("../Main/Credits"),
 	get_node("../Main/Content"),
-	get_node("../Main/Language"),
-	get_node("../Main/RhythiaRewrite")
+	get_node("../Main/Language")
 ]
 onready var buttons:Array = [
 	$L/Results,
@@ -18,14 +17,12 @@ onready var buttons:Array = [
 	$L/Settings,
 	$L/Credits,
 	$L/ContentMgr,
-	$L/Language,
-	$L/RhythiaRewrite
+	$L/Language
 ]
 var use_ver_b:Array = [
 	false,
 #	false,
 	true,
-	false,
 	false,
 	false,
 	false
@@ -36,7 +33,6 @@ var hide_ver:Array = [
 	false,
 	true,
 	false,
-	false,
 	false
 ]
 onready var smm_visibility:Dictionary = {
@@ -46,10 +42,7 @@ onready var smm_visibility:Dictionary = {
 	$L/Credits: true,
 	$L/ContentMgr: true,
 	$L/Language: false,
-	$L/StartVR: false,
-	$L/OldMenu: false,
-	$L/Quit: true,
-	$L/RhythiaRewrite: true
+	$L/Quit: true
 }
 
 func press(bi:int,q:bool=false):
@@ -69,24 +62,6 @@ func press(bi:int,q:bool=false):
 #	get_node("Click").visible = !open
 #	get_node("../SidebarClick").visible = open
 
-func to_old_menu():
-	get_node("../Press").play()
-	get_viewport().get_node("Menu").black_fade_target = true
-	if Input.is_key_pressed(KEY_C):
-		if !Rhythia.selected_song:
-			Globals.notify(Globals.NOTIFY_WARN,"No selected song","Automatically selecting a song")
-			Rhythia.select_song(Rhythia.registry_song.items[0])
-		Rhythia.menu_target = "res://scripts/cursordance/dancetest.tscn"
-	else: Rhythia.menu_target = "res://scenes/menu/menu.tscn"
-	yield(get_tree().create_timer(0.35),"timeout")
-	get_tree().change_scene("res://scenes/loaders/menuload.tscn")
-
-func to_vr():
-	get_node("../Press").play()
-	get_viewport().get_node("Menu").black_fade_target = true
-	yield(get_tree().create_timer(0.35),"timeout")
-	Rhythia.start_vr()
-
 func quit():
 	get_node("../Press").play()
 	get_viewport().get_node("Menu").black_fade_target = true
@@ -101,8 +76,6 @@ func _ready():
 	$Click.connect("mouse_entered",self,"_on_Sidebar", [true])
 	$L.connect("mouse_entered",self,"_on_Sidebar", [true])
 	connect("mouse_exited",self,"_on_Sidebar", [false])
-	$L/OldMenu.connect("pressed",self,"to_old_menu")
-	$L/StartVR.connect("pressed",self,"to_vr")
 	$L/Quit.connect("pressed",self,"quit")
 
 	$L/ContentMgr.visible = not Rhythia.vr

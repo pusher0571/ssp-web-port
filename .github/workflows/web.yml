@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .tools
-          key: godot-3.6.2-linux-web-v1
+          key: godot-3.6.2-linux-web-threads-v2
       - name: Install official Godot 3.6.2
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -31,7 +31,7 @@ jobs:
           curl -fL --retry 3 https://github.com/godotengine/godot-builds/releases/download/3.6.2-stable/Godot_v3.6.2-stable_linux_headless.64.zip -o /tmp/godot.zip
           unzip -o /tmp/godot.zip -d .tools
           curl -fL --retry 3 https://github.com/godotengine/godot-builds/releases/download/3.6.2-stable/Godot_v3.6.2-stable_export_templates.tpz -o /tmp/templates.tpz
-          unzip -j /tmp/templates.tpz templates/webassembly_release.zip templates/webassembly_debug.zip -d .tools
+          unzip -j /tmp/templates.tpz templates/webassembly_threads_release.zip templates/webassembly_threads_debug.zip -d .tools
           chmod +x .tools/Godot_v3.6.2-stable_linux_headless.64
       - name: Build game
         run: python3 tools/build_web.py --godot "$PWD/.tools/Godot_v3.6.2-stable_linux_headless.64"

@@ -97,7 +97,8 @@ func get_absolute_position():
 	return Vector2(pos.x,-pos.y) + Vector2(1,1)
 
 func _input(event:InputEvent):
-	if !Rhythia.replaying and !Rhythia.vr:
+	if OS.has_feature("HTML5") and !Web.pointer_locked: return
+	if !Rhythia.vr:
 		if can_switch_move_modes:
 			if event is InputEventJoypadMotion:
 				move_mode = C_JOYSTICK
@@ -157,20 +158,6 @@ func recolor(col:Color):
 
 var mt = 0
 func _process(delta):
-	if Input.is_action_just_pressed("debug_enable_mouse"):
-		mt = mt + 1
-		if mt == 1:
-			Input.set_custom_mouse_cursor(null)
-			Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		if mt == 2:
-			Input.set_custom_mouse_cursor(load("res://assets/images/ui/blank.png"))
-			Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
-			if Rhythia.absolute_mode:
-				Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
-			else:
-				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			mt = 0
 	frame = Engine.get_frames_drawn()
 	if Rhythia.cursor_spin != 0 and !Rhythia.cursor_face_velocity:
 		$Mesh.rotate_z(deg2rad(-delta*Rhythia.cursor_spin))
@@ -182,16 +169,6 @@ func _process(delta):
 	if Input.is_key_pressed(KEY_C):
 		ct = fmod(ct+delta,3)
 		global_transform.origin = Vector3(ct-1.5,sin(ct*4),global_transform.origin.z)
-
-	if Rhythia.replaying:
-		var p
-		if Rhythia.replay.sv == 1 or Rhythia.replay.autoplayer: p = Rhythia.replay.get_cursor_position(get_parent().ms)
-		else: p = Rhythia.replay.get_cursor_position(get_parent().rms)
-		if Rhythia.replay.sv < 3:
-			transform.origin.x = p.x
-			transform.origin.y = p.y
-		else:
-			move_cursor_abs(Vector2(p.x,p.y))
 
 	if Rhythia.show_cursor and Rhythia.cursor_trail and Rhythia.smart_trail and trail_started:
 		var start_p = global_transform.origin
@@ -236,15 +213,13 @@ func _process(delta):
 func _ready():
 	if !Rhythia.show_cursor: visible = false
 
-	if !Rhythia.replaying:
-		if not Rhythia.absolute_mode:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
-			Input.set_custom_mouse_cursor(load("res://assets/images/ui/blank.png"))
+	if OS.has_feature("HTML5"):
+		pass # The browser capture button supplies the required user gesture.
+	elif not Rhythia.absolute_mode:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
-		Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
-
+		Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
+		Input.set_custom_mouse_cursor(load("res://assets/images/ui/blank.png"))
 	var mat:SpatialMaterial = $Mesh.get("material/0")
 	$Mesh.scale = Vector3(Rhythia.cursor_scale,Rhythia.cursor_scale,Rhythia.cursor_scale)
 	$Mesh2.scale = Vector3(Rhythia.cursor_scale,Rhythia.cursor_scale,Rhythia.cursor_scale)

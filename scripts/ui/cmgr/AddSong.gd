@@ -856,9 +856,9 @@ func back_to_menu():
 func _ready():
 	
 	if OS.has_feature("HTML5"):
-		$SelectType/vulnus.disabled = true
+		$SelectType/vulnus.visible = false
 		$SelectType/vulnus.hint_tooltip = "Convert Vulnus archives to SSPM in the desktop game first."
-		$SelectType/sspmr.disabled = true
+		$SelectType/sspmr.visible = false
 	$SelectType/txt.connect("pressed",self,"select_type",[T_TXT])
 	$SelectType/sspm.connect("pressed",self,"select_type",[T_SSPM])
 	$SelectType/vulnus.connect("pressed",self,"select_type",[T_VULNUS])

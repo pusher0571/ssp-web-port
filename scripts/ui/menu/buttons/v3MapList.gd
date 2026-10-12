@@ -179,7 +179,14 @@ func load_pg(select_cur:bool=false):
 	for n in btns: n.queue_free()
 	btns.clear()
 
-	if disp.size() == 0: return
+	if disp.size() == 0:
+		var hint = Label.new()
+		hint.text = "Keine passenden Maps.\nImport: Plus-Symbol links > Sound Space Plus Map"
+		hint.autowrap = true
+		hint.rect_min_size = Vector2(320, 110)
+		add_child(hint)
+		btns.append(hint)
+		return
 	page_size = ((get_parent().rect_size.y)/90) * 1.5
 	if page_size % 2 != 0:
 		page_size += 1

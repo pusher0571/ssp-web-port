@@ -62,10 +62,9 @@ func update_hud():
 var ending:bool = false
 func end(end_type:int):
 	if ending: return
+	if OS.has_feature("HTML5"): Web.end_game(self)
 	print("My god, what are you doing!?")
 	ending = true
-	if end_type == Globals.END_GIVEUP and Rhythia.record_replays and !Rhythia.replaying:
-		Rhythia.replay.store_sig($Spawn.rms,Globals.RS_GIVEUP)
 	if end_type != Globals.END_PASS:
 		Rhythia.fail_asp.play()
 	get_tree().paused = true
@@ -81,9 +80,6 @@ func end(end_type:int):
 	Rhythia.song_end_combo = max_combo
 	print("song max combo: ", max_combo)
 	
-	if Rhythia.record_replays and !Rhythia.replaying:
-		Rhythia.replay.end_recording()
-	
 	if Rhythia.queue_active and end_type == Globals.END_PASS:
 		if Rhythia.do_pb_check_and_set():
 			Globals.notify(Globals.NOTIFY_SUCCEED,"new best!")
@@ -94,10 +90,6 @@ func end(end_type:int):
 			Rhythia.select_song(next)
 			$HUD.set_song_name(Rhythia.selected_song.name)
 			Rhythia.update_rpc_song()
-			if Rhythia.record_replays and !Rhythia.replaying:
-				Rhythia.replay = Replay.new()
-				Rhythia.replay.start_recording(Rhythia.selected_song)
-			
 			$Spawn.notes_loaded = false
 			$Spawn.chaos_rng = RandomNumberGenerator.new()
 			$Spawn.earthquake_rng = RandomNumberGenerator.new()
@@ -113,8 +105,11 @@ func end(end_type:int):
 			$Spawn.emit_signal("ms_change",$Spawn.ms)
 			loadMapFile()
 			ending = false
+			if OS.has_feature("HTML5"):
+				$Spawn.active = false
+				Web.begin_game(self)
 			return
-	elif Rhythia.restart_on_death and end_type == Globals.END_FAIL and !Rhythia.replaying:
+	elif Rhythia.restart_on_death and end_type == Globals.END_FAIL:
 		if Rhythia.do_pb_check_and_set():
 			print("Logging PB, restarting death")
 		"""
@@ -192,9 +187,6 @@ func _process(delta):
 				else: end(Globals.END_GIVEUP)
 		else:
 			giving_up = 0
-	
-	if Rhythia.replaying and Input.is_action_just_pressed("pause"):
-		get_tree().paused = !get_tree().paused
 	
 	if get_tree().paused:
 		$Spawn.last_usec = OS.get_ticks_usec()
@@ -313,5 +305,26 @@ func _ready():
 	yield(get_tree(),"idle_frame")
 	black_fade_target = false
 	$ForceMatLoad.visible = false
-	$Spawn.active = true
+	if OS.has_feature("HTML5"):
+		$Spawn.active = false
+		Web.begin_game(self)
+	else:
+		$Spawn.active = true
+
+func web_pointer_changed(locked: bool):
+	if ending: return
+	if locked:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		$Spawn.last_usec = OS.get_ticks_usec()
+		$Spawn.active = true
+		if $Spawn.music_started and $Spawn.pause_state == 0:
+			$Spawn/Music.play(max(0, ($Spawn.ms + Rhythia.music_offset) / 1000.0))
+	else:
+		if $Spawn.active and $Spawn.music_started:
+			Rhythia.song_end_pause_count += 1
+		$Spawn.active = false
+		$Spawn/Music.stop()
+
+func _exit_tree():
+	if OS.has_feature("HTML5"): Web.end_game(self)
 

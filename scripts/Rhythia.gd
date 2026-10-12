@@ -71,42 +71,9 @@ func select_miss_effect(effect:NoteEffect):
 		selected_miss_effect = effect
 		emit_signal("selected_miss_effect_changed",effect)
 func select_song(song:Song):
-	if song.is_online:
-		emit_signal("download_start")
-		get_tree().paused = true
-
-		print("[Online Map] Starting download")
-		var id:String = Online.download_map(song)
-
-		print("[Online Map] Waiting for download to finish")
-		var result:Dictionary = yield(Online,"map_downloaded")
-		while result.id != id:
-			print("[Online Map] Wrong download: %s != %s" % [result.id, id])
-			result = yield(Online,"map_downloaded")
-		print("[Online Map] Download finished")
-
-		get_tree().paused = false
-		if result.success:
-			emit_signal("download_done")
-			selected_song = song
-			emit_signal("selected_song_changed",song)
-		elif result.error == "010-100":
-			emit_signal("download_done")
-		else:
-			Globals.confirm_prompt.s_alert.play()
-			Globals.confirm_prompt.open(
-				"Failed to download map.\nError code: %s" % result.error,
-				"Error",
-				[{text="OK"}]
-			)
-			yield(Globals.confirm_prompt,"option_selected")
-			Globals.confirm_prompt.s_back.play()
-			Globals.confirm_prompt.close()
-			yield(Globals.confirm_prompt,"done_closing")
-			emit_signal("download_done")
-	else:
-		selected_song = song
-		emit_signal("selected_song_changed",song)
+	if !song or song.is_online: return
+	selected_song = song
+	emit_signal("selected_song_changed",song)
 
 
 # Song ending state data
@@ -121,8 +88,8 @@ var song_end_accuracy_str:String
 var song_end_time_str:String
 var song_end_length:float
 var song_end_combo:int
-# Replay data
-var replay:Replay
+# Legacy replay fields (compatibility with old settings; always disabled)
+var replay:Object
 var replay_path:String = ""
 var was_replay:bool = false
 var replaying:bool = false
@@ -212,86 +179,6 @@ var ignore_controller_detection:bool = false
 var expand_hud_onhr:bool = false
 
 # VR startup
-func start_vr():
-	if vr:
-		print("VR already active")
-		return
-	print("VR START")
-	vr = true
-
-	get_viewport().hdr = false
-	OS.vsync_enabled = false
-	Engine.target_fps = 90
-
-	if Input.is_key_pressed(KEY_SHIFT):
-		print("enabling fake vr")
-		OS.window_maximized = true
-		fake_vr = true
-
-		var ev = InputEventKey.new()
-		ev.scancode = KEY_F
-		InputMap.action_add_event("vr_switch_hands",ev)
-
-		ev = InputEventMouseButton.new()
-		ev.button_index = BUTTON_LEFT
-		InputMap.action_add_event("vr_click",ev)
-	else:
-		vr_interface.initialize()
-		get_viewport().arvr = true
-
-		# Hand switch binds
-		var ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_OCULUS_MENU
-		InputMap.action_add_event("vr_switch_hands",ev)
-
-		ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_OPENVR_MENU
-		InputMap.action_add_event("vr_switch_hands",ev)
-
-		# Give up binds
-		ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_VR_GRIP
-		InputMap.action_add_event("give_up",ev)
-
-		ev = InputEventJoypadMotion.new()
-		ev.axis = JOY_VR_ANALOG_GRIP
-		InputMap.action_add_event("give_up",ev)
-
-		# Pause binds
-		ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_VR_TRIGGER
-		InputMap.action_add_event("pause",ev)
-
-		ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_OCULUS_BY
-		InputMap.action_add_event("pause",ev)
-
-		ev = InputEventJoypadMotion.new()
-		ev.axis = JOY_VR_ANALOG_TRIGGER
-		InputMap.action_add_event("pause",ev)
-
-		# Click binds
-		ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_VR_TRIGGER
-		InputMap.action_add_event("vr_click",ev)
-
-		ev = InputEventJoypadButton.new()
-		ev.button_index = JOY_OCULUS_AX
-		InputMap.action_add_event("vr_click",ev)
-
-		ev = InputEventJoypadMotion.new()
-		ev.axis = JOY_VR_ANALOG_TRIGGER
-		InputMap.action_add_event("vr_click",ev)
-
-	var vr_av:Spatial = load("res://vr/VRPlayer.tscn").instance()
-	rootg.add_child(vr_av)
-	vr_av.name = "VRPlayer"
-	vr_player = vr_av
-
-	menu_target = "res://vr/vrmenu.tscn"
-	get_tree().change_scene("res://scenes/loaders/menuload.tscn")
-
-# Song queue
 func prepare_queue():
 	record_replays = false
 	queue_active = true
@@ -424,7 +311,6 @@ func update_rpc_song(): # Discord RPC
 	if mod_flashlight: mods.append("Flashlight")
 	if mod_nearsighted: mods.append("Nearsight")
 	if mod_hardrock: mods.append("Hard Rock")
-	if replay.autoplayer: mods.append("Auto")
 
 	if mods.size() == 0: txt = "No modifiers"
 	else:
@@ -562,11 +448,9 @@ func _set_grade_system(v:int):
 # Settings - Notes
 var approach_rate:float = 40 setget ,get_approach_rate
 func get_approach_rate():
-	if replaying and replay.settings.has("approach_rate"): return replay.settings.get("approach_rate")
 	return approach_rate
 var spawn_distance:float = 40 setget ,get_spawn_distance
 func get_spawn_distance():
-	if replaying and replay.settings.has("spawn_distance"): return replay.settings.get("spawn_distance")
 	return spawn_distance
 var do_note_pushback:bool = true # true; notes go past grid on miss, false; notes always vanish at grid
 var half_ghost:bool = false
@@ -580,7 +464,6 @@ var note_spin_z:float = 0
 var note_opacity:float = 1
 var fade_length:float = 0.5 setget ,get_fade_length
 func get_fade_length():
-	if replaying and replay.settings.has("fade_length"): return replay.settings.get("fade_length")
 	return fade_length
 
 var show_hit_effect:bool = true
@@ -593,19 +476,15 @@ var hlm_converted:bool = false
 var sensitivity:float = 0.5
 var parallax:float = 6.5 setget ,get_parallax
 func get_parallax():
-	if replaying and replay.settings.has("parallax"): return replay.settings.get("parallax")
 	return parallax
 var ui_parallax:float = 1.63 setget ,get_ui_parallax
 func get_ui_parallax():
-	if replaying and replay.settings.has("ui_parallax"): return replay.settings.get("ui_parallax")
 	return ui_parallax
 var grid_parallax:float = 0 setget ,get_grid_parallax
 func get_grid_parallax():
-	if replaying and replay.settings.has("grid_parallax"): return replay.settings.get("grid_parallax")
 	return grid_parallax
 var fov:float = 70  setget ,get_fov
 func get_fov():
-	if replaying and replay.settings.has("fov"): return replay.settings.get("fov")
 	return fov
 var hit_fov:bool = false
 var hit_fov_additive:bool = true
@@ -615,7 +494,6 @@ var hit_fov_decay:float = 20
 var camera_mode:int = Globals.CAMERA_HALF_LOCK
 var cam_unlock:bool = false setget ,get_cam_unlock
 func get_cam_unlock():
-	if replaying and replay.settings.has("cam_unlock"): return replay.settings.get("cam_unlock")
 	return cam_unlock
 var lock_mouse:bool = true
 var absolute_mode:bool = false
@@ -623,7 +501,7 @@ var absolute_scale:float = 1
 var edge_drift:float = 0
 var disable_intro:bool = false
 
-# Settings - Replays
+# Legacy settings fields (no recording or playback)
 var record_replays:bool = false
 var alt_cam:bool = false
 var record_limit:int = 0
@@ -795,7 +673,7 @@ func remove_favorite(id:String):
 
 # Personal bests
 func do_pb_check_and_set() -> bool:
-	if mod_nofail or was_replay or start_offset != 0 or just_ended_queue or OS.has_feature("debug"): return false
+	if mod_nofail or start_offset != 0 or just_ended_queue or OS.has_feature("debug"): return false
 	var has_passed:bool = song_end_type == Globals.END_PASS
 	var pb:Dictionary = {}
 	pb.position = song_end_position
@@ -1161,9 +1039,6 @@ func load_saved_settings(saveFile:String = Globals.p("user://settings.json")):
 			hit_effect_at_cursor = data.hit_effect_at_cursor
 		if data.has("show_warnings"):
 			show_warnings = data.show_warnings
-		if data.has("record_replays"):
-			should_ask_about_replays = false
-			record_replays = data.record_replays
 		if data.has("alt_cam"):
 			alt_cam = data.alt_cam
 		if data.has("record_mode"):
@@ -1475,7 +1350,7 @@ func load_saved_settings(saveFile:String = Globals.p("user://settings.json")):
 			show_warnings = bool(file.get_8())
 		if sv >= 34:
 			should_ask_about_replays = false
-			record_replays = bool(file.get_8())
+			file.get_8() # Consume the removed replay setting in legacy files.
 		if sv >= 35:
 			alt_cam = bool(file.get_8())
 		if sv >= 36:
@@ -2127,7 +2002,6 @@ func do_init(_ud=null):
 			file.store_line("The default blender cube is about the right size for a mesh.")
 			file.store_line("In blender, the mesh should face towards the positive Y direction.")
 			file.close()
-		if !dir.dir_exists(Globals.p("user://replays")): dir.make_dir(Globals.p("user://replays"))
 		if !dir.dir_exists(user_best_dir):
 			convert_pb_format = true
 			dir.make_dir(user_best_dir)
@@ -2159,55 +2033,8 @@ func do_init(_ud=null):
 	load_color_txt()
 	yield(self,"colors_done")
 
-	# Load content
+	# Local imports only.
 	var mapreg:Array = []
-	emit_signal("init_stage_reached","Loading content 1/3\nBuilt-in & DLC")
-	yield(get_tree(),"idle_frame")
-	if first_init_done:
-		mapreg.append(["built-in","res://assets/songs/built_in_maps.sspmr"])
-		if installed_dlc.has("ssp_testcontent"): mapreg.append(["test maps","res://test_assets/test_maps.sspmr"])
-	else:
-		print("loaded ssp_content DLC")
-		mapreg.append(["built-in","res://assets/songs/built_in_maps.sspmr"])
-		installed_dlc.append("ssp_content")
-		if OS.has_feature("editor") or ProjectSettings.load_resource_pack("res://testcontent.pck"):
-			print("loaded ssp_testcontent DLC")
-			mapreg.append(["test maps","res://test_assets/test_maps.sspmr"])
-			installed_dlc.append("ssp_testcontent")
-
-	var n
-	if !first_init_done: # mods can't be reloaded
-		if !OS.has_feature("debug"):
-			emit_signal("init_stage_reached","Loading content 2/3\nMods")
-			yield(get_tree(),"idle_frame")
-			dir.change_dir(user_mod_dir)
-			dir.list_dir_begin(true)
-			n = dir.get_next()
-			while n:
-				if ProjectSettings.load_resource_pack(user_mod_dir + "/" + n):
-					installed_mods.append(n.get_file().replace(n.get_extension(),""))
-				n = dir.get_next()
-			dir.list_dir_end()
-		else:
-			Globals.notify(
-				Globals.NOTIFY_INFO,
-				"This is a development environment, mods will not be loaded.",
-				"Not loading mods"
-			)
-	emit_signal("init_stage_num",1)
-
-	emit_signal("init_stage_reached","Loading content 3/3\nContent packs")
-	yield(get_tree(),"idle_frame")
-	dir.change_dir(user_pack_dir)
-	dir.list_dir_begin(true)
-	n = dir.get_next()
-	while n:
-		installed_packs.append([n.get_file(),user_pack_dir + "/" + n])
-		if dir.file_exists(n + "/pack.sspmr"): mapreg.append([n.get_file(),user_pack_dir + "/" + n + "/pack.sspmr"])
-		n = dir.get_next()
-	dir.list_dir_end()
-
-
 	emit_signal("init_stage_reached","Register content")
 	yield(get_tree(),"idle_frame")
 	var lt:float = OS.get_ticks_msec()
@@ -2333,7 +2160,7 @@ func do_init(_ud=null):
 			registry_song.add_vulnus_map(vmaps[i])
 
 
-		emit_signal("init_stage_reached","Register content 5/5\nLoad online maps")
+		emit_signal("init_stage_reached","Register content 5/5\nFinalize local maps")
 		yield(get_tree(),"idle_frame")
 
 		Online.load_db_maps()
@@ -2385,16 +2212,18 @@ func do_init(_ud=null):
 		# errors are returned when settings are invalid
 		get_tree().change_scene("res://scenes/errors/settings.tscn")
 		return
+	enable_oldmenu = false
+	vr = false
+	record_replays = false
+	replaying = false
+	absolute_mode = false
+	disable_update = true
 	print('settings done')
 
 	emit_signal("init_stage_reached","Init default assets 6/6")
 	if lp: yield(get_tree(),"idle_frame")
 
-	var menu_music: String = "res://assets/sfx/music/menu_loop.ogg"
-	if legacy_music:
-		menu_music = "res://assets/sfx/music/OLDmenu_loop.ogg"
-
-	def_menu_bgm = load(menu_music)
+	def_menu_bgm = load("res://assets/sfx/silence.wav")
 
 	# check for updates
 	if !disable_update:
@@ -2531,20 +2360,6 @@ func do_init(_ud=null):
 		alert_snd_played = true
 		Globals.confirm_prompt.open(alert,"Alert",[{text="OK",wait=2}])
 		yield(Globals.confirm_prompt,"option_selected")
-		Globals.confirm_prompt.s_next.play()
-		Globals.confirm_prompt.close()
-		yield(Globals.confirm_prompt,"done_closing")
-	if should_ask_about_replays and not OS.has_feature("Android"):
-		emit_signal("init_stage_reached","Setup")
-		if !alert_snd_played: Globals.confirm_prompt.s_alert.play()
-		alert_snd_played = true
-		Globals.confirm_prompt.open("Would you like to record replays? This can be changed in settings later.","Replays",[{text="No"},{text="Yes"}])
-		var sel = yield(Globals.confirm_prompt,"option_selected")
-		record_replays = bool(sel)
-		Globals.confirm_prompt.open("Do you favor high quality or low file size replays? This can be changed in settings later.","Replays",[{text="File Size"},{text="Quality"}])
-		sel = yield(Globals.confirm_prompt,"option_selected")
-		record_limit = sel
-		save_settings()
 		Globals.confirm_prompt.s_next.play()
 		Globals.confirm_prompt.close()
 		yield(Globals.confirm_prompt,"done_closing")

@@ -65,9 +65,7 @@ func _ready():
 	Rhythia.connect("selected_song_changed",self,"upd")
 	Rhythia.connect("speed_mod_changed",self,"upd")
 	Rhythia.connect("menu_music_state_changed",self,"upd_mm")
-	var menu_music: String = "res://assets/sfx/music/menu_loop.ogg"
-	if Rhythia.legacy_music:
-		menu_music = "res://assets/sfx/music/OLDmenu_loop.ogg"
+	var menu_music: String = "res://assets/sfx/silence.wav"
 	$MenuSong.stream = Rhythia.get_stream_with_default("user://menu",load(menu_music))
 	if $MenuSong.stream is AudioStreamSample: $MenuSong.stream.loop_mode = 1
 	else: $MenuSong.stream.loop = true

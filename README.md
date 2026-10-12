@@ -1,152 +1,41 @@
 # SSP Web Port
 
-**Spielen: https://pusher0571.github.io/ssp-web-port/**
+Inoffizieller Browser-Port von [Rhythia / Sound Space Plus](https://github.com/Rhythia/sound-space-plus), für PC mit Maus und Tastatur.
 
-Inoffizieller Browser-Port von Rhythia / Sound Space Plus für PC mit Maus und Tastatur.
-Die Website läuft auf GitHub Pages; Map-Downloads laufen über einen Cloudflare Worker im kostenlosen Tarif. Der PC des Besitzers muss dafür nicht eingeschaltet sein.
+**Spielen:** https://pusher0571.github.io/ssp-web-port/
 
-- Drei eingebaute Maps und der mitgelieferte Rhythia-Katalog.
-- SSPM-Import sowie Text-Maps mit MP3/OGG über den Content Manager.
-- Einstellungen, importierte Maps und Bestleistungen bleiben lokal im jeweiligen Browser.
-- Keine Installation, kein Hosting-Account für Spieler erforderlich.
+## Lokale Imports
 
-Vulnus-ZIP- und alte SSPMR-Archive müssen zuerst im Desktop-Spiel zu SSPM konvertiert werden. VR und native Discord-Integration sind im Web deaktiviert. Der erste Start lädt ungefähr 163 MiB; Audio-Offset kann in den Spieleinstellungen angepasst werden. Browserdaten nicht löschen, wenn lokale Maps und Scores erhalten bleiben sollen.
+Keine mitgelieferten Songs, kein Online-Katalog und keine Gameplay-Replays.
 
-## Bauen und aktualisieren
+1. Spiel starten → Content Manager (Plus-Symbol links).
+2. Sound Space Plus Map → Dateien wählen → eigene `.sspm` importieren.
+3. Map auswählen und starten. **Spielen / Fortsetzen** fängt die Maus ein.
+4. **ESC** pausiert und gibt die Maus frei; ein Klick setzt die Map fort.
 
-Jeder Push auf `main` baut das Spiel mit Godot 3.6.2 und veröffentlicht es automatisch über `.github/workflows/web.yml` auf GitHub Pages. `dist/` und Export-Templates sind nicht Teil der Git-Historie.
+Alternativ: Text-Map mit MP3/OGG. Vulnus-ZIP und alte Map-Packs sind im Web nicht verfügbar.
 
-Für einen lokalen Build die offiziellen Godot-3.6.2-Export-Templates herunterladen und `templates/webassembly_release.zip` und `templates/webassembly_debug.zip` nach `.tools/` entpacken. Anschließend:
+Maps, Einstellungen und Highscores bleiben im lokalen Browserspeicher. Imports werden nicht zum Host hochgeladen. Updates behalten bereits importierte Maps; das Löschen der Websitedaten entfernt sie.
 
-```sh
-python tools/build_web.py --godot /absoluter/pfad/zu/godot
-python -m http.server 8000 --directory dist
-```
+## Browser und Audio
 
-Dann http://localhost:8000 öffnen. Die HTML-Datei braucht einen HTTP-Server.
+Godot 3.6.2, WebGL, Threads und AudioWorklet; Audio-Puffer 60 ms. Die Noten folgen der Audiozeit, ohne die Musik zur laufenden Synchronisierung neu zu starten. Der persönliche Audio-Offset ist im Spiel einstellbar.
 
-Der Map-Vermittler steht unter `hosting/`. Zum Aktualisieren dort `npm ci`, `npx wrangler login` und `npx wrangler deploy` ausführen. Eine neue Worker-Adresse in `web/proxy-config.js` eintragen und auf `main` pushen. Der Worker akzeptiert nur Lesezugriffe auf den festen Rhythia-CDN und speichert keine Spielstände. Tests: `node --test hosting/test/worker.test.mjs`.
+Ein Service Worker im Spielverzeichnis ergänzt COOP/COEP-Header für Threads auf GitHub Pages. Beim ersten Aufruf lädt die Seite einmal neu. Er speichert keine Dateien zwischen. Benötigt werden HTTPS, Service Worker und Cross-Origin-Isolation. Falls der eingebettete Browser diese Funktionen verhindert, den Link in einem aktuellen Chrome, Edge oder Firefox öffnen.
 
-GitHub Pages und Cloudflare Workers haben kostenlose Nutzungslimits. Das Projekt aktiviert keinen kostenpflichtigen Tarif. Online-Maps sind zusätzlich von der Verfügbarkeit des ursprünglichen Rhythia-CDN abhängig. Der Katalog liegt als Momentaufnahme in `assets/web/map-index.json`; er kann durch die aktuelle `https://cdn.rhythia.net/index.json` ersetzt werden.
+## Lokal bauen und veröffentlichen
 
-Quellcode und Lizenz stammen vom [Originalprojekt](https://github.com/Rhythia/sound-space-plus). Die ursprüngliche README folgt unten.
+Benötigt: Python 3, [Godot 3.6.2](https://github.com/godotengine/godot-builds/releases/tag/3.6.2-stable) und dessen offizielle Web-Templates.
 
----
+- `webassembly_threads_debug.zip` und `webassembly_threads_release.zip` nach `.tools/` kopieren.
+- `python tools/build_web.py --godot /pfad/zu/godot`
+- `python -m http.server 8765 --directory dist`
+- `http://localhost:8765` öffnen.
 
-# Sound Space Plus
-> "Rhyt-Rhythmia"
->
-> - Edward "BTMC" Ling, 2024
+`.github/workflows/web.yml` baut bei einem Push auf `main` und veröffentlicht auf GitHub Pages. Kein privater PC oder Cloudflare-Worker wird zum Hosten benötigt.
 
-> [!CAUTION]
-> CAPO Games and rhythia.com are not affiliated nor supported by us! We do, however, support any modification of our logos/content in the client source because of our [license](https://github.com/David20122/sound-space-plus/blob/nightly/LICENSE.txt)!
+## Herkunft und Rechte
 
-While you're here, join our discord in [here](https://discord.gg/rhythia)
+MIT-lizenzierter Spielcode aus dem [Originalprojekt](https://github.com/Rhythia/sound-space-plus). Basils ursprünglicher Copyright-Hinweis bleibt in [LICENSE.txt](LICENSE.txt). Weitere Hinweise stehen im Quellcode und den Schriftordnern (Lato, Noto Sans JP, Roboto). Die WAV-Effekte dieses Ports wurden mathematisch erzeugt; ursprüngliche Musik wird nicht mitgeliefert.
 
-# Table of contents
-(Stuff you will see in this README)
-
-- [Downloading the game](#dl)
-    - [Important info before Downloading](#dl-imp)
-        - [Windows](#dl-win)
-        - [Linux](#dl-penguin)
-        - [Android](#dl-phone)
-    - [Making SSP executable on Linux](#dl-linuxfix)
-- [Troubleshooting](#tr)
-- [User Folder location](#usr)
-- [Updating the game](#upd)
-- [Developer zone](#dev)
-
-# Downloading and playing the game <a href="#dl-title" id="dl"/>
-
-## IMPORTANT! <a href="#dl-main" id="dl-imp"/>
-
-- There's no point in git cloning this repository.
-
-  - Head to the [releases tab](https://github.com/David20122/sound-space-plus/releases) to Download this game.
-
-- As of the Apr16 Update, Androids don't have a User Folder, this is temporary and will be changed in the future.
-
-### For Windows users: <a href="#dl-main" id="dl-win"/>
-
-- In [releases](https://github.com/David20122/sound-space-plus/releases), press on the `windows.zip` folder to download it
-
-- Once downloaded, do the following:
-  - Right click the folder and extract it to either a custom folder [RECOMMENDED] or the folder you downloaded to [NOT RECOMMENDED]. Alternatively, you can open the zip file and drag the contents inside to a custom folder.
-  - Run SoundSpacePlus.exe to play this, easy I know.
-
-### For Linux users: <a href="#dl-main" id="dl-penguin"/>
-
-- In [releases](https://github.com/David20122/sound-space-plus/releases), press on the `linux.zip` folder to download it
-
-- Once downloaded do the following:
-  - If you have a GUI File Explorer:
-    - In Downloads, right click and extract the files like on Windows OR open the zip and extract it
-  - If you don't have a GUI File Explorer:
-    - Download your game normally and `cd` to your Downloads folder (usually `cd ~/Downloads`)
-    - Inside your downloads folder type: `mkdir SSP && unzip linux.zip -d SSP/` to make a SSP directory and unzip linux.zip to that directory (REMEMBER TO INSTALL THE UNZIP PACKAGE USING YOUR PACKAGE MANAGER!!!)
-    
-### For Android Users: <a href="#dl-main" id="dl-phone"/>
-
-- Download gles2 on older devices, or gles3 on newer devices
-- Install the apk on your phone
-
-## If you can't execute your game on Linux <a href="#dl-trouble" id="dl-linuxfix"/>
-
-- Open your terminal and do the following:
-```bash
-$ cd ~/DIRECTORY_OF_YOUR_SSP_FOLDER
-$ sudo chmod +x SoundSpacePlus.x86_64
-# Alternatively you can use
-# sudo chmod 777 SoundSpacePlus.x86.64
-```
-
-# Troubleshooting <a href="#tlsh-title" id="tr"/>
-
-As everything you download online, executing may or may not work.
-
-- [WINDOWS ONLY] If the game closes by itself
-  - Download and install [vc_redist](https://aka.ms/vs/17/release/vc_redist.x64.exe)
-  - Open the game.
-  - If your game still doesn't work, head to the [Discord](https://discord.gg/ssp) and head to the support channel.
-  
-  
-# User folder location <a href="#usr-title" id="usr"/>
-
-- Windows:
-
-`%appdata%\SoundSpacePlus`
-
-- Linux:
-
-`~/.local/share/SoundSpacePlus`
-
-- Android:
-
-Currently not available (Apr16 update)
-
-### Alternatively you can access the user folder if you go into settings and press User Folder
-
-# Updating your game <a href="#upd-title" id="upd"/>
-
-As the time goes, we all have the necessity to update what's old correct?
-
-### Here's how you do it then.
-
-- Head to the [latest version of the game](https://github.com/David20122/sound-space-plus/releases/latest) and Download it
-- On the location where your folder is delete or replace every file inside it
-  - Keep in mind that you <ins>**__DON'T__**</ins> lose your passes, replays or maps when update the game, those are located in the [user folder](#usr)
-  - [Apr25 Update] Windows and Linux users now have an integrated auto-updater as of the Apr25 update. Android and MacOS auto-updaters will come soon. [Click here to access the latest releases with auto-updaters](https://github.com/krmeet/sound-space-plus/releases/latest)
-- And you're done. You are now up-to-date.
-
-# Development <a href="dev-title" id="dev"/>
-After cloning the repository download the Discord Game SDK and put the following files into addons/discord_game_sdk:  
-- `discord_game_sdk.dll`  
-- `discord_game_sdk.dylib`  
-- `discord_game_sdk.so` (__rename to `libdiscord_game_sdk.so`__)  
-
-Don't forget to fetch the big files that are missing using
-```sh
-$ git lfs fetch --all
-$ git lfs pull
-```
+Kein offizielles Rhythia-Angebot. Die Code-Lizenz ist keine pauschale Erlaubnis für Musik, Coverbilder oder Marken Dritter. Importiere nur Dateien, die du verwenden darfst. Die übrigen Assets und das Angebot wurden nicht vollständig rechtlich geprüft.

@@ -5,15 +5,7 @@ var detected_controllers = Input.get_connected_joypads().size()
 
 func files_dropped(files:PoolStringArray,_screen:int):
 	if has_been_pressed: return
-	if files.size() == 1 and files[0].get_extension() == "sspre":
-		has_been_pressed = true
-		Rhythia.replay = Replay.new()
-		Rhythia.replaying = true
-		Rhythia.replay_path = files[0]
-		get_viewport().get_node("Menu").black_fade_target = true
-		yield(get_tree().create_timer(0.35),"timeout")
-		get_tree().change_scene("res://scenes/loaders/songload.tscn")
-	else:
+	if files.size() > 0:
 		var song
 		for file in files:
 			if file.get_extension() != "sspm": continue

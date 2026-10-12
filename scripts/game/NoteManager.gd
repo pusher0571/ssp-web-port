@@ -40,7 +40,6 @@ var prev_ms:float = -100000
 
 var next_ms:float = 0
 
-var last_cursor_position:Vector3 = Vector3(-1,1,0)
 
 
 # new mmi note stuff
@@ -187,13 +186,10 @@ func note_reposition(i:int):
 func note_check_collision(i:int):
 	var cpos:Vector3 = $Cursor.transform.origin
 	
-	if Rhythia.replaying and Rhythia.replay.sv != 1:
-		return Rhythia.replay.should_hit(i)
-	else:
-		var hbs:float = Rhythia.note_hitbox_size/2
-		if hbs == 0.57: hbs = 0.56875 # 1.1375
-		var ori:Vector2 = notes[i][0]
-		return (cpos.x <= ori.x + hbs and cpos.x >= ori.x - hbs) and (cpos.y <= ori.y + hbs and cpos.y >= ori.y - hbs)
+	var hbs:float = Rhythia.note_hitbox_size/2
+	if hbs == 0.57: hbs = 0.56875 # 1.1375
+	var ori:Vector2 = notes[i][0]
+	return (cpos.x <= ori.x + hbs and cpos.x >= ori.x - hbs) and (cpos.y <= ori.y + hbs and cpos.y >= ori.y - hbs)
 
 var asq = Rhythia.note_visual_approach
 var last_reposition_ms:float = -10000
@@ -263,8 +259,6 @@ func reposition_notes(force:bool=false,rerun_start:int=-1):
 #				$Label.text += "MISS %s @ %s\n" % [ i, ms ]
 #				note_passed = true
 				# notes should not be in the hitwindow if the game is paused
-				if !Rhythia.replaying and Rhythia.record_replays:
-					Rhythia.replay.note_miss(i)
 				notes[i][2] = Globals.NSTATE_MISS
 				if Rhythia.play_miss_snd: 
 					if Rhythia.sfx_2d:
@@ -285,8 +279,6 @@ func reposition_notes(force:bool=false,rerun_start:int=-1):
 			elif result:
 #				$Label.text += "HIT %s @ %s\n" % [ i, ms ]
 #				note_passed = true
-				if !Rhythia.replaying and Rhythia.record_replays:
-					Rhythia.replay.note_hit(i)
 				notes[i][2] = Globals.NSTATE_HIT
 #				if Rhythia.play_hit_snd and !Rhythia.ensure_hitsync:
 #					var sfx
@@ -413,10 +405,6 @@ func _ready():
 #	$Hit2D.stream = Rhythia.hit_snd
 	SFXManager.setup()
 	
-	
-	if !Rhythia.replaying and Rhythia.record_replays:
-		Rhythia.replay = Replay.new()
-		Rhythia.replay.start_recording(Rhythia.selected_song)
 	
 	chaos_rng.seed = hash(Rhythia.selected_song.id)
 	earthquake_rng.seed = hash(Rhythia.selected_song.id)
@@ -620,47 +608,13 @@ func do_note_queue():
 	#			break
 
 
-var rec_t:float = 0
-var rms:float = 0
-var rec_interval:float = 12
 var pause_state:float = 0
 var pause_cooldown:float = 0
 var pause_ms:float = 0
-var replay_unpause:bool = false
 var can_skip:bool = ((next_ms-prev_ms) > 5000) and (next_ms >= max(ms+(3000*speed_multi),1100*speed_multi))
 var ms_offset:float = 0
 
-var replay_sig:Array = []
 var last_usec = OS.get_ticks_usec()
-
-func _set_rec_interval(delta:float):
-	var newpos = $Cursor.transform.origin
-	var diff = last_cursor_position.distance_to(newpos)/delta
-	
-	var min_interval = 30
-	var max_interval = 144
-	match Rhythia.record_limit:
-		1:
-			min_interval = 60
-			max_interval = 240
-	if Engine.target_fps != 0:
-		max_interval = min(max_interval,Engine.target_fps)
-		min_interval = min(min_interval,max_interval)
-	var target_interval = min_interval+((diff/12)*(max_interval-min_interval))
-	var new_interval = rec_interval
-	if rec_interval != target_interval:
-		match Rhythia.record_mode:
-			0:
-				new_interval = target_interval
-			1:
-				if target_interval > rec_interval: new_interval += (target_interval-rec_interval) * (delta / 0.2)
-				else: new_interval += (target_interval-rec_interval) * (delta / 2)
-			2:
-				if target_interval > rec_interval: new_interval += (target_interval-rec_interval) * (delta / 2)
-				else: new_interval = target_interval
-	rec_interval = clamp(new_interval,min_interval,max_interval)
-	
-	last_cursor_position = newpos
 
 func _process(delta:float):
 	var u = OS.get_ticks_usec()
@@ -671,7 +625,6 @@ func _process(delta:float):
 	elif Rhythia.get("cam_unlock"): do_spin()
 	else: do_half_lock()
 	
-	_set_rec_interval(delta)
 	
 	if active and notes_loaded:
 		if !notes_loaded: return
@@ -679,165 +632,67 @@ func _process(delta:float):
 		
 		$Cursor.can_switch_move_modes = (ms < Rhythia.music_offset)
 		
-		if !Rhythia.replaying:
-			if Input.is_action_just_released("pause"):
-				if pause_state > 0:
-					pause_state = -1
-					ms = pause_ms# - (750 * speed_multi)
-					if Rhythia.record_replays:
-						Rhythia.replay.store_sig(rms,Globals.RS_CANCEL_UNPAUSE)
-					emit_signal("ms_change",ms)
-					$Music.stop()
-			elif Input.is_action_just_pressed("pause"):
-				if pause_state == 0 and can_skip:
-					var prev_ms = ms
-					if Rhythia.record_replays:
-						Rhythia.replay.store_sig(rms,Globals.RS_SKIP)
-					ms = next_ms - 1000 - (1000*speed_multi)
-					emit_signal("ms_change",ms)
-					do_note_queue()
+		if Input.is_action_just_released("pause"):
+			if pause_state > 0:
+				pause_state = -1
+				ms = pause_ms# - (750 * speed_multi)
+				emit_signal("ms_change",ms)
+				$Music.stop()
+		elif Input.is_action_just_pressed("pause"):
+			if pause_state == 0 and can_skip:
+				var prev_ms = ms
+				ms = next_ms - 1000 - (1000*speed_multi)
+				if $Music.playing: $Music.play(max(0, (ms + Rhythia.music_offset) / 1000.0))
+				emit_signal("ms_change",ms)
+				do_note_queue()
 #					if (ms + Rhythia.music_offset) >= Rhythia.start_offset:
 #						$Music.play((ms + Rhythia.music_offset)/1000)
 #						music_started = true
-				else:
-					if pause_state == 0 and (ms > (1000 * speed_multi) and ms < get_parent().last_ms) and pause_cooldown == 0 and !Rhythia.disable_pausing:
-						print("PAUSED AT MS %.0f" % ms)
-						if Rhythia.record_replays:
-							Rhythia.replay.store_pause(rms)
-						Rhythia.song_end_pause_count += 1
-						pause_state = -1
-			#			ms -= 750
-						emit_signal("ms_change",ms)
-						pause_ms = ms# + (750 * speed_multi)
-						$Music.stop()
-						get_parent().combo_level = 1
-						get_parent().lvl_progress = 0
-						get_parent().update_hud()
-					elif pause_state != 0:
-						if Rhythia.record_replays:
-							Rhythia.replay.store_sig(rms,Globals.RS_START_UNPAUSE)
-						pause_state = 1
-						ms = pause_ms - (pause_state * (750 * speed_multi))
-						emit_signal("ms_change",ms)
-						$Music.volume_db = -30
-						$Music.play(ms/1000)
-			if Input.is_action_pressed("pause") and pause_state > 0:
-				var prev_state = pause_state
-				pause_state = max(pause_state - (delta/0.75), 0)
-				$Music.volume_db = min($Music.volume_db + (delta * 30), 0)
-				if pause_state == 0:
+			else:
+				if pause_state == 0 and (ms > (1000 * speed_multi) and ms < get_parent().last_ms) and pause_cooldown == 0 and !Rhythia.disable_pausing:
+					print("PAUSED AT MS %.0f" % ms)
+					Rhythia.song_end_pause_count += 1
+					pause_state = -1
+		#			ms -= 750
+					emit_signal("ms_change",ms)
+					pause_ms = ms# + (750 * speed_multi)
+					$Music.stop()
+					get_parent().combo_level = 1
+					get_parent().lvl_progress = 0
+					get_parent().update_hud()
+				elif pause_state != 0:
+					pause_state = 1
+					ms = pause_ms - (pause_state * (750 * speed_multi))
+					emit_signal("ms_change",ms)
+					$Music.volume_db = -30
+					$Music.play(max(0, (ms + Rhythia.music_offset)/1000))
+		if Input.is_action_pressed("pause") and pause_state > 0:
+			var prev_state = pause_state
+			pause_state = max(pause_state - (delta/0.75), 0)
+			$Music.volume_db = min($Music.volume_db + (delta * 30), 0)
+			if pause_state == 0:
 		#				print("YEAH baby that's what i've been waiting for")
-					if (prev_state != pause_state) and Rhythia.record_replays:
-						Rhythia.replay.store_sig(rms,Globals.RS_FINISH_UNPAUSE)
-					$Music.volume_db = 0
-					pause_state = 0
-					pause_cooldown = 1
-			elif pause_state == 0:
-				 pause_cooldown = max(pause_cooldown - delta, 0)
-		elif Rhythia.replay.sv != 1:
-			var should_pause:bool = false
-			var should_giveup:bool = false
-			var should_skip:bool = false
-			var just_started_unpause:bool = false
-			var just_cancelled_unpause:bool = false
-			var should_end_unpause:bool = false
-			if replay_sig.size() != 0:
-				print(replay_sig)
-			for s in replay_sig:
-				if s[1] == Globals.RS_PAUSE: should_pause = true
-				elif s[1] == Globals.RS_GIVEUP: should_giveup = true
-				elif s[1] == Globals.RS_SKIP: should_skip = true
-				elif s[1] == Globals.RS_START_UNPAUSE:
-					just_started_unpause = true
-					replay_unpause = true
-				elif s[1] == Globals.RS_CANCEL_UNPAUSE:
-					just_cancelled_unpause = true
-					replay_unpause = false
-				elif s[1] == Globals.RS_FINISH_UNPAUSE:
-					should_end_unpause = true
-
-			if should_skip:
-				var prev_ms = ms
-				if Rhythia.record_replays:
-					Rhythia.replay.store_sig(rms,Globals.RS_SKIP)
-				ms = next_ms - 1000 - (1000*speed_multi)
-				emit_signal("ms_change",ms)
-				do_note_queue()
-				if (ms + Rhythia.music_offset) >= Rhythia.start_offset:
-					$Music.play((ms + Rhythia.music_offset)/1000)
-					music_started = true
-			if just_cancelled_unpause:
-				pause_state = -1
-				ms = pause_ms# - (750 * speed_multi)
-				Rhythia.replay.store_sig(rms,Globals.RS_CANCEL_UNPAUSE)
-				emit_signal("ms_change",ms)
-				$Music.stop()
-			elif should_pause:
-				print("PAUSED AT MS %.0f" % ms)
-				if Rhythia.record_replays:
-					Rhythia.replay.store_sig(rms,Globals.RS_PAUSE)
-				Rhythia.song_end_pause_count += 1
-				pause_state = -1
-	#			ms -= 750
-				emit_signal("ms_change",ms)
-				pause_ms = ms# + (750 * speed_multi)
-				$Music.stop()
-				get_parent().combo_level = 1
-				get_parent().lvl_progress = 0
-				get_parent().update_hud()
-			elif just_started_unpause:
-	#				print("YEAH baby that's what i've been waiting for")
-	#				print(pause_ms)
-				pause_state = 1
-				ms = pause_ms - (pause_state * (750 * speed_multi))
-				emit_signal("ms_change",ms)
-				$Music.volume_db = -30
-				$Music.play((ms + Rhythia.music_offset)/1000)
-			if replay_unpause and pause_state >= 0:
-				pause_state = max(pause_state - (delta/0.75), 0)
-				$Music.volume_db = min($Music.volume_db + (delta * 30), 0)
-				if should_end_unpause:
-		#				print("YEAH baby that's what i've been waiting for")
-					$Music.volume_db = Rhythia.music_volume_db
-					pause_state = 0
-			if should_giveup: get_parent().end(Globals.END_GIVEUP)
-		
-		rms += delta * 1000
-		rec_t += delta
-		if pause_state == 0 or (pause_state > 0 and (Input.is_action_pressed("pause") or replay_unpause)):
-			ms += delta * 1000 * speed_multi
+				$Music.volume_db = 0
+				pause_state = 0
+				pause_cooldown = 1
+		elif pause_state == 0:
+			 pause_cooldown = max(pause_cooldown - delta, 0)
+		if pause_state == 0 or (pause_state > 0 and Input.is_action_pressed("pause")):
+			if $Music.playing and !Rhythia.disable_desync:
+				# Follow the audible audio clock instead of repeatedly restarting music.
+				var audio_time = $Music.get_playback_position() + (AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()) * speed_multi
+				ms = max(ms, audio_time * 1000.0 - Rhythia.music_offset)
+			else:
+				ms += delta * 1000 * speed_multi
 			emit_signal("ms_change",ms)
 			do_note_queue()
 			if (ms + Rhythia.music_offset) >= Rhythia.start_offset and !music_started:
 				$Music.play((ms + Rhythia.music_offset)/1000)
 				music_started = true
 		
-		if Rhythia.replaying:
-			replay_sig = Rhythia.replay.get_signals(rms)
-		
 		emit_signal("timer_update",ms,can_skip)
 		
-		if $Music.playing and !Rhythia.disable_desync:
-			var playback_pos:float = $Music.get_playback_position()*1000.0
-			if abs(playback_pos - (ms + Rhythia.music_offset)) > (100 * max(speed_multi, 1.0)):
-				if Rhythia.desync_alerts:
-					Globals.notify(
-						Globals.NOTIFY_WARN,
-						"Audio was desynced by %.2f ms, correcting." % [playback_pos - (ms + Rhythia.music_offset)],
-						"Music Sync Correction"
-					)
-				$Music.play((ms + Rhythia.music_offset)/1000.0)
-		
 		var rn_res:bool = reposition_notes()
-		if !Rhythia.replaying and Rhythia.record_replays:
-			var should_write_pos:bool = rn_res
-			var ri = 1/round(max(32,rec_interval))
-			if pause_state == -1: ri /= 3
-			if rn_res or rec_t >= ri:
-				rec_t = 0
-				should_write_pos = true
-				Rhythia.replay.store_cursor_pos(rms,$Cursor.rpos.x,$Cursor.rpos.y)
-		
 		if Rhythia.rainbow_grid:
 			$Inner.get("material/0").albedo_color = Color.from_hsv(Rhythia.rainbow_t*0.1,0.65,1)
 			$Outer.get("material/0").albedo_color = Color.from_hsv(Rhythia.rainbow_t*0.1,0.65,1)

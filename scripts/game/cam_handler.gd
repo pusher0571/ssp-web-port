@@ -1,6 +1,6 @@
 extends Spatial
 
-var state = (Rhythia.replaying and Rhythia.alt_cam)
+var state = false
 var debug:bool = OS.has_feature("debug")
 
 func _ready():

@@ -9,9 +9,6 @@ var black_fade:float = 0
 
 func _ready():
 	get_tree().paused = false
-	if Rhythia.vr:
-		target = "res://vr/vrmenu.tscn"
-		Rhythia.vr_player.transform.origin = Vector3(0,0,0)
 	PhysicsServer.set_active(true)
 	Input.set_custom_mouse_cursor(null)
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
@@ -20,7 +17,6 @@ func _ready():
 	Rhythia.loaded_world = null
 	Rhythia.was_replay = Rhythia.replaying
 	Rhythia.replaying = false
-	if Rhythia.was_replay: Rhythia.restore_prev_state()
 	if Rhythia.selected_song: Rhythia.selected_song.discard_notes()
 	Rhythia.replay_path = ""
 	$BlackFade.visible = true

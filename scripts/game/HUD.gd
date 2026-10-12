@@ -100,8 +100,6 @@ func set_song_name(name:String=Rhythia.selected_song.name):
 	songnametxt.text = name
 
 func song_end(end_type:int):
-	if end_type == Globals.END_GIVEUP and Rhythia.record_replays and !Rhythia.replaying:
-		Rhythia.replay.store_sig(Spawn.rms,Globals.RS_GIVEUP)
 	if end_type != Globals.END_PASS:
 		friend.failed = true
 		Rhythia.fail_asp.play()
@@ -474,10 +472,6 @@ func _ready():
 	
 	
 	var ms = ""
-	
-	if Rhythia.replaying:
-		if Rhythia.replay.autoplayer: modicons.get_node("Autoplay").visible = true
-		else: modicons.get_node("Replaying").visible = true
 	
 	if Rhythia.mod_nofail: ms += tr("[ NOFAIL ACTIVE ]") + "\n"
 	elif Rhythia.health_model == Globals.HP_OLD: ms += "Using old hp model (more hp + fast regen)\n"
