@@ -111,7 +111,13 @@
         document.getElementById('overlay').hidden = true; document.body.classList.remove('pregame'); canvas.focus();
       } catch (error) { status.textContent = 'Start fehlgeschlagen: ' + error.message + ' — Bitte Seite neu laden.'; document.getElementById('start').disabled = false; }
     };
-    document.getElementById('fullscreen').onclick = async () => { try { await canvas.requestFullscreen(); canvas.focus(); } catch (error) { alert(error.message); } };
+    document.getElementById('fullscreen').onclick = async () => {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await (document.body.classList.contains('pregame') ? document.documentElement : canvas).requestFullscreen();
+        if (!document.body.classList.contains('pregame')) canvas.focus();
+      } catch (error) { alert(error.message); }
+    };
     document.getElementById('help-button').onclick = () => document.getElementById('help').showModal();
     document.getElementById('close-help').onclick = () => { document.getElementById('help').close(); if (!document.body.classList.contains('pregame')) canvas.focus(); };
     canvas.addEventListener('contextmenu', event => event.preventDefault());
