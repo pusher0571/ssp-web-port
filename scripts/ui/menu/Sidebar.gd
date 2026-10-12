@@ -41,8 +41,7 @@ onready var smm_visibility:Dictionary = {
 	$L/Settings: true,
 	$L/Credits: true,
 	$L/ContentMgr: true,
-	$L/Language: false,
-	$L/Quit: true
+	$L/Language: false
 }
 
 func press(bi:int,q:bool=false):
@@ -62,12 +61,6 @@ func press(bi:int,q:bool=false):
 #	get_node("Click").visible = !open
 #	get_node("../SidebarClick").visible = open
 
-func quit():
-	get_node("../Press").play()
-	get_viewport().get_node("Menu").black_fade_target = true
-	yield(get_tree().create_timer(0.35),"timeout")
-	get_tree().quit()
-
 func _ready():
 	for i in range(buttons.size()):
 		buttons[i].connect("pressed",self,"press",[i])
@@ -76,12 +69,9 @@ func _ready():
 	$Click.connect("mouse_entered",self,"_on_Sidebar", [true])
 	$L.connect("mouse_entered",self,"_on_Sidebar", [true])
 	connect("mouse_exited",self,"_on_Sidebar", [false])
-	$L/Quit.connect("pressed",self,"quit")
 
 	$L/ContentMgr.visible = not Rhythia.vr
 #	$L/StartVR.visible = Rhythia.vr_available and not Rhythia.vr
-	if Rhythia.vr or !OS.has_feature("pc"):
-		$L/Quit/Label.text = "Quit to Home"
 
 	if Rhythia.single_map_mode:
 		for n in $L.get_children():
